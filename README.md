@@ -1,4 +1,5 @@
-This is a basic plugin template for use with CommonLibSSE
+This is a CommonLib implementation of a .NETFramework plugin originally written by KernalsEgg for Blade and Blunt - A Combat Overhaul by SimonMagus616. 
+Much of the credit for the RE work goes to KernalsEgg.
 
 ## Requirements
 * [CMake](https://cmake.org/)
@@ -16,7 +17,7 @@ This is a basic plugin template for use with CommonLibSSE
 
 ## Building
 ```
-git clone https://github.com/Ryan-rsm-McKenzie/ExamplePlugin-CommonLibSSE
+git clone https://github.com/colinswrath/BladeAndBlunt
 cd ExamplePlugin-CommonLibSSE
 git submodule update --init --recursive
 cmake -B build -S .
