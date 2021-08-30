@@ -1,4 +1,4 @@
-This is a CommonLib implementation of a .NETFramework plugin originally written by KernalsEgg for Blade and Blunt - A Combat Overhaul by SimonMagus616. 
+This is a CommonLib implementation of a .NETScriptFramework plugin originally written by KernalsEgg for Blade and Blunt - A Combat Overhaul by SimonMagus616. 
 Much of the credit for the RE work goes to KernalsEgg.
 
 ## Requirements
