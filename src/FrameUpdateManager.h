@@ -68,9 +68,10 @@ private:
 				player->RemoveSpell(settings->IsBlockingSpell);
 			}
 		}
-		
-		if (player->IsSneaking())
+
+		if (player->IsSneaking() && IsMoving(player))
 		{
+
 			if(!HasSpell(player, settings->IsSneakingSpell))
 				player->AddSpell(settings->IsSneakingSpell);
 		}

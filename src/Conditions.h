@@ -35,5 +35,4 @@ namespace Conditions
 	}
 	inline static REL::Relocation<decltype(HasSpell)> _HasSpell;
 
-
 };
