@@ -92,7 +92,7 @@ set(SOURCES
 	src/Settings.h
 	src/Hooks.cpp
 	src/Hooks.h
-	src/FrameUpdateManager.h
+	src/UpdateManager.h
 	src/Conditions.h
 )
 

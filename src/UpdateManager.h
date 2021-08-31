@@ -4,7 +4,7 @@
 #include "Settings.h"
 
 using namespace Conditions;
-class FrameUpdateManager
+class UpdateManager
 {
 public:
 	inline static void Install()
@@ -30,6 +30,8 @@ public:
 
 		REL::safe_write<std::uint8_t>(TestAlAl.address(), test);
 		logger::info("Installed hook for bow drawn");
+
+		
 	}
 
 private:

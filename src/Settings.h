@@ -18,6 +18,7 @@ public:
 
 	float BowDrainStamMagnitude;
 
+	static std::uint32_t ParseUInt32(const std::string& str);
 
 	std::string FileName;
 	

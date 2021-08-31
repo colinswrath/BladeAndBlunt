@@ -1,5 +1,6 @@
 #include "Settings.h"
 #include <SimpleIni.h>
+#include <sstream>
 
 Settings* Settings::GetSingleton()
 {
@@ -18,32 +19,39 @@ void Settings::LoadSettings()
 	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
 	std::string bowStaminaFormID((ini.GetValue("","BowDrainStaminaFormId", "")));
 
-	
 	std::string fileName(ini.GetValue("", "sModFileName", ""));
 
 	if(!attackingSpellFormID.empty())
 	{
-		IsAttackingSpellFormId = RE::FormID(std::stoul(attackingSpellFormID, NULL, 16));
+		IsAttackingSpellFormId = RE::FormID(ParseUInt32(attackingSpellFormID));
 	}
 
 	if(!blockingSpellFormID.empty())
 	{
-		IsBlockingSpellFormId = RE::FormID(std::stoul(blockingSpellFormID,NULL,16));
+		IsBlockingSpellFormId = RE::FormID(ParseUInt32(blockingSpellFormID));
 	}
 
 	if(!sneakingSpellFormID.empty())
 	{
-		IsSneakingSpellFormId = RE::FormID(std::stoul(sneakingSpellFormID, NULL, 16));
+		IsSneakingSpellFormId = RE::FormID(ParseUInt32(sneakingSpellFormID));
 	}
 
 	if (!bowStaminaFormID.empty())
 	{
-		BowDrainStaminaFormId = RE::FormID(std::stoul(bowStaminaFormID, NULL, 16));
+		BowDrainStaminaFormId = RE::FormID(ParseUInt32(bowStaminaFormID));
 	}
 
 	FileName = fileName;
 }
 
+
+std::uint32_t Settings::ParseUInt32(const std::string& str)
+{
+	std::uint32_t result;
+	std::istringstream ss{ str };
+	ss >> result;
+	return result;
+}
 
 
 void Settings::LoadForms()
@@ -60,9 +68,4 @@ void Settings::LoadForms()
 	if(BowDrainStaminaFormId)
 		BowDrainStaminaSpell = skyrim_cast<RE::SpellItem*>(RE::TESDataHandler::GetSingleton()->LookupForm(BowDrainStaminaFormId, FileName));
 
-	//Cache magnitude
-	if (BowDrainStaminaSpell)
-	{
-		BowDrainStamMagnitude = BowDrainStaminaSpell->GetCostliestEffectItem()->effectItem.magnitude*-1;
-	}
 }

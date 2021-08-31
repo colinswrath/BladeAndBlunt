@@ -1,11 +1,11 @@
-#include "FrameUpdateManager.h"
+#include "UpdateManager.h"
 
 namespace Hooks
 {
 	void Install()
 	{
-		FrameUpdateManager::Install();
-		FrameUpdateManager::InstallBowDrawnHook();
+		UpdateManager::Install();
+		UpdateManager::InstallBowDrawnHook();
 		logger::info("Damage hook installed.");
 	}
 }
