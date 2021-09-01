@@ -17,39 +17,39 @@ void Settings::LoadSettings()
 	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
 	std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
 	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
-	std::string bowStaminaFormID((ini.GetValue("","BowDrainStaminaFormId", "")));
+	std::string bowStaminaRate((ini.GetValue("","BowStaminaRatePerSec", "5")));
 
 	std::string fileName(ini.GetValue("", "sModFileName", ""));
 
 	if(!attackingSpellFormID.empty())
 	{
-		IsAttackingSpellFormId = RE::FormID(ParseUInt32(attackingSpellFormID));
+		IsAttackingSpellFormId = ParseFormID(attackingSpellFormID);
 	}
 
 	if(!blockingSpellFormID.empty())
 	{
-		IsBlockingSpellFormId = RE::FormID(ParseUInt32(blockingSpellFormID));
+		IsBlockingSpellFormId = ParseFormID(blockingSpellFormID);
 	}
 
 	if(!sneakingSpellFormID.empty())
 	{
-		IsSneakingSpellFormId = RE::FormID(ParseUInt32(sneakingSpellFormID));
+		IsSneakingSpellFormId = ParseFormID(sneakingSpellFormID);
 	}
 
-	if (!bowStaminaFormID.empty())
+	if (!bowStaminaRate.empty())
 	{
-		BowDrainStaminaFormId = RE::FormID(ParseUInt32(bowStaminaFormID));
+		BowStaminaRatePerSec = stof(bowStaminaRate);
 	}
 
 	FileName = fileName;
 }
 
 
-std::uint32_t Settings::ParseUInt32(const std::string& str)
+RE::FormID Settings::ParseFormID(const std::string& str)
 {
-	std::uint32_t result;
+	RE::FormID result;
 	std::istringstream ss{ str };
-	ss >> result;
+	ss >> std::hex >> result;
 	return result;
 }
 
@@ -64,8 +64,5 @@ void Settings::LoadForms()
 	
 	if(IsSneakingSpellFormId)
 		IsSneakingSpell = skyrim_cast<RE::SpellItem*>(RE::TESDataHandler::GetSingleton()->LookupForm(IsSneakingSpellFormId, FileName));
-
-	if(BowDrainStaminaFormId)
-		BowDrainStaminaSpell = skyrim_cast<RE::SpellItem*>(RE::TESDataHandler::GetSingleton()->LookupForm(BowDrainStaminaFormId, FileName));
 
 }

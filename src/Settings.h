@@ -14,11 +14,10 @@ public:
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
-	RE::SpellItem* BowDrainStaminaSpell;
 
-	float BowDrainStamMagnitude;
+	float BowStaminaRatePerSec;
 
-	static std::uint32_t ParseUInt32(const std::string& str);
+	static RE::FormID ParseFormID(const std::string& str);
 
 	std::string FileName;
 	

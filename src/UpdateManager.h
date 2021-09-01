@@ -9,7 +9,6 @@ class UpdateManager
 public:
 	inline static void Install()
 	{
-	
 		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(35565) , 0x1E};
 		
 		auto& trampoline = SKSE::GetTrampoline();
@@ -25,13 +24,10 @@ public:
 		std::array<std::uint8_t, 2> test{ 0x84, 0xC0 };
 
 		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_call<5>(BowDrawHook.address(),IsBowDrawnCheck);
-
+		trampoline.write_call<5>(BowDrawHook.address(), IsZoomed);
 
 		REL::safe_write<std::uint8_t>(TestAlAl.address(), test);
-		logger::info("Installed hook for bow drawn");
-
-		
+		logger::info("Installed hook for bow drawn");	
 	}
 
 private:
@@ -88,20 +84,30 @@ private:
 
 	inline static REL::Relocation<decltype(OnFrameUpdate)> _OnFrameFunction;
 
-	static bool IsBowDrawnCheck()
+	static bool IsZoomed()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
-		auto attackState = player->GetAttackState();
 		auto settings = Settings::GetSingleton();
-
 		auto playerCamera = RE::PlayerCamera::GetSingleton();
+
+		if (IsBowDrawCheck(player, playerCamera) && !player->IsInvulnerable())
+		{
+			if (player->GetActorValue(RE::ActorValue::kStamina))
+			{
+				player->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, -1 * (settings->BowStaminaRatePerSec * (*secondsSinceLastFrameWorldTime.get())));
+			}
+		}
+
+		return playerCamera->bowZoomedIn;
+	}
+
+	static bool IsBowDrawCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
+	{
+		auto attackState = player->GetAttackState();
+
 		if (playerCamera->bowZoomedIn)
 		{
-			if (HasSpell(player,settings->BowDrainStaminaSpell))
-			{
-				player->RemoveSpell(settings->BowDrainStaminaSpell);
-			}
-			return true;
+			return false;
 		}
 
 		switch (attackState)
@@ -117,12 +123,7 @@ private:
 
 			if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow || equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow)
 			{
-				if (!HasSpell(player, settings->BowDrainStaminaSpell))
-				{				
-					player->AddSpell(settings->BowDrainStaminaSpell);
-					//player->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, settings->BowDrainStamMagnitude);
-				}
-				return false;
+				return true;
 			}
 			break;
 		}
@@ -132,12 +133,7 @@ private:
 
 			if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow)
 			{
-				if (!HasSpell(player, settings->BowDrainStaminaSpell))
-				{
-					player->AddSpell(settings->BowDrainStaminaSpell);
-					//player->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, settings->BowDrainStamMagnitude);
-				}
-				return false;
+				return true;
 			}
 			break;
 		}
@@ -146,10 +142,6 @@ private:
 		{
 			break;
 		}
-		}
-		if (HasSpell(player, settings->BowDrainStaminaSpell))
-		{
-			player->RemoveSpell(settings->BowDrainStaminaSpell);
 		}
 		return false;
 	}

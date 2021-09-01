@@ -3,6 +3,8 @@
 namespace Conditions
 {
 
+	static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::ID(523660) };
+
 	static bool IsAttacking(RE::Actor* actor)
 	{
 		using func_t = decltype(&Conditions::IsAttacking);
