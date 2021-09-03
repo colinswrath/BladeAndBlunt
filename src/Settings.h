@@ -14,8 +14,7 @@ public:
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
-
-	float BowStaminaRatePerSec;
+	RE::SpellItem* BowStaminaSpell;
 
 	static RE::FormID ParseFormID(const std::string& str);
 

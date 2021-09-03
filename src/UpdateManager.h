@@ -17,6 +17,8 @@ public:
 		logger::info("Installed hook for frame update");
 	}
 
+	//UNUSED FOR NOW. BOW CHECK ROLLED INTO FRAME UPDATE
+	/*
 	inline static void InstallBowDrawnHook()
 	{
 		REL::Relocation<std::uintptr_t> BowDrawHook{ REL::ID(39375) , 0x6B6 };
@@ -29,6 +31,7 @@ public:
 		REL::safe_write<std::uint8_t>(TestAlAl.address(), test);
 		logger::info("Installed hook for bow drawn");	
 	}
+	*/
 
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
@@ -36,6 +39,22 @@ private:
 
 		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
 		auto settings = Settings::GetSingleton();
+		auto playerCamera = RE::PlayerCamera::GetSingleton();
+
+		if (IsBowDrawNoZoomCheck(player, playerCamera))
+		{
+			if (!HasSpell(player, settings->BowStaminaSpell))
+			{
+				player->AddSpell(settings->BowStaminaSpell);
+			}
+		}
+		else
+		{
+			if (HasSpell(player, settings->BowStaminaSpell))
+			{
+				player->RemoveSpell(settings->BowStaminaSpell);
+			}
+		}
 
 		if (IsAttacking(player))
 		{
@@ -84,24 +103,8 @@ private:
 
 	inline static REL::Relocation<decltype(OnFrameUpdate)> _OnFrameFunction;
 
-	static bool IsZoomed()
-	{
-		auto player = RE::PlayerCharacter::GetSingleton();
-		auto settings = Settings::GetSingleton();
-		auto playerCamera = RE::PlayerCamera::GetSingleton();
-
-		if (IsBowDrawCheck(player, playerCamera) && !player->IsInvulnerable())
-		{
-			if (player->GetActorValue(RE::ActorValue::kStamina))
-			{
-				player->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kStamina, -1 * (settings->BowStaminaRatePerSec * (*secondsSinceLastFrameWorldTime.get())));
-			}
-		}
-
-		return playerCamera->bowZoomedIn;
-	}
-
-	static bool IsBowDrawCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
+	//Checks for bow being drawn but not zoomed
+	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
 	{
 		auto attackState = player->GetAttackState();
 
@@ -146,5 +149,4 @@ private:
 		return false;
 	}
 
-	
 };
