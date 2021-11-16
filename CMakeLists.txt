@@ -94,6 +94,7 @@ set(SOURCES
 	src/Hooks.h
 	src/UpdateManager.h
 	src/Conditions.h
+	src/Offsets.h
 )
 
 source_group(
