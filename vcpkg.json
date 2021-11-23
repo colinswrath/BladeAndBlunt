@@ -1,8 +1,8 @@
 {
-  "name": "exampleproject",
+  "name": "BladeAndBlunt",
   "version-string": "1.0.0",
-  "description": "An example project built using CommonLibSSE",
-  "homepage": "https://github.com/Ryan-rsm-McKenzie/ExamplePlugin-CommonLibSSE",
+  "description": "Plugin for blade and blunt to utilize efficient status checking",
+  "homepage": "https://github.com/colinswrath/BladeAndBlunt",
   "license": "MIT",
   "dependencies": [
     "boost-atomic",
