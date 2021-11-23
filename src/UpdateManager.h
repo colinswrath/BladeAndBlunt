@@ -9,18 +9,15 @@ class UpdateManager
 public:
 	inline static void Install()
 	{
-		//REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(35565) , 0x1E };
-		//0x05D9F50 + 0x6E
-		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::Offset(0x05D9F50 + 0x6E)};
+		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E};
 		
 		auto& trampoline = SKSE::GetTrampoline();
-		logger::info("Got Trampoline");
 		_OnFrameFunction = trampoline.write_call<5>(OnFrame_Update_Hook.address(), OnFrameUpdate);
 
 		logger::info("Installed hook for frame update");
 	}
 
-	//UNUSED FOR NOW. BOW CHECK ROLLED INTO FRAME UPDATE
+	//UNUSED FOR NOW. BOW CHECK ROLLED INTO FRAME UPDATE// 1.5.97 offsets
 	/*
 	inline static void InstallBowDrawnHook()
 	{

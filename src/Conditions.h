@@ -3,17 +3,14 @@
 namespace Conditions
 {
 
-	//static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::ID(523660) };
-	static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::Offset(0x030064C8) };
+	static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::ID(410199) };
 
 	static bool IsAttacking(RE::Actor* actor)
 	{
 		using func_t = decltype(&Conditions::IsAttacking);
 
-		//REL::Relocation<func_t> func{ REL::ID(37637) };
-		REL::Relocation<func_t> func{ REL::Offset(0x064CD90) };
-		//64CD90
-		//71EAD8
+		REL::Relocation<func_t> func{ REL::ID(38590) };
+
 		return func(actor);
 	}
 
@@ -22,9 +19,8 @@ namespace Conditions
 	static bool IsBlocking(RE::Actor* actor)
 	{
 		using func_t = decltype(&Conditions::IsBlocking);
-		
-		//REL::Relocation<func_t> func{ REL::ID(36927) };
-		REL::Relocation<func_t> func{ REL::Offset(0x006302F0) };
+
+		REL::Relocation<func_t> func{ REL::ID(37952) };
 
 		return func(actor);
 	}
@@ -35,8 +31,7 @@ namespace Conditions
 	{
 		using func_t = decltype(&Conditions::HasSpell);
 
-		//REL::Relocation<func_t> func{ REL::ID(37828) };
-		REL::Relocation<func_t> func{ REL::Offset(0x00658B40) };
+		REL::Relocation<func_t> func{ REL::ID(38782) };
 
 		return func(actor, spell);
 	}
