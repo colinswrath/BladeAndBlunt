@@ -5,6 +5,6 @@ namespace Hooks
 	void Install()
 	{
 		UpdateManager::Install();
-		logger::info("Damage hook installed.");
+		logger::info("Update hook installed.");
 	}
 }

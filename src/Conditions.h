@@ -8,9 +8,7 @@ namespace Conditions
 	static bool IsAttacking(RE::Actor* actor)
 	{
 		using func_t = decltype(&Conditions::IsAttacking);
-
 		REL::Relocation<func_t> func{ REL::ID(38590) };
-
 		return func(actor);
 	}
 
@@ -19,9 +17,7 @@ namespace Conditions
 	static bool IsBlocking(RE::Actor* actor)
 	{
 		using func_t = decltype(&Conditions::IsBlocking);
-
 		REL::Relocation<func_t> func{ REL::ID(37952) };
-
 		return func(actor);
 	}
 

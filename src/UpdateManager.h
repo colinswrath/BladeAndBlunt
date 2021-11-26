@@ -17,6 +17,16 @@ public:
 		logger::info("Installed hook for frame update");
 	}
 
+	inline static void InstallScalePatch()
+	{
+		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
+		
+		auto& trampoline = SKSE::GetTrampoline();
+		_OnFrameFunction = trampoline.write_call<5>(_GetScaleFunction.address(), GetScale);
+
+		logger::info("Installed hook for scale patch");
+	}
+
 	//UNUSED FOR NOW. BOW CHECK ROLLED INTO FRAME UPDATE// 1.5.97 offsets
 	/*
 	inline static void InstallBowDrawnHook()
@@ -102,6 +112,20 @@ private:
 	}
 
 	inline static REL::Relocation<decltype(OnFrameUpdate)> _OnFrameFunction;
+
+	inline static float GetScale(RE::TESObjectREFR *a1)
+	{
+		if(skyrim_cast<RE::Actor*>(a1) == RE::PlayerCharacter::GetSingleton())
+		{
+			return a1->refScale / 100.0f;
+		}
+		else
+		{
+			return _GetScaleFunction(a1);
+		}
+	}
+
+	inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
 
 	//Checks for bow being drawn but not zoomed
 	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
