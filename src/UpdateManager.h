@@ -22,26 +22,10 @@ public:
 		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
 		
 		auto& trampoline = SKSE::GetTrampoline();
-		_OnFrameFunction = trampoline.write_call<5>(_GetScaleFunction.address(), GetScale);
+		_GetScaleFunction = trampoline.write_call<5>(Scale_Patch_Hook.address(), GetScale);
 
 		logger::info("Installed hook for scale patch");
 	}
-
-	//UNUSED FOR NOW. BOW CHECK ROLLED INTO FRAME UPDATE// 1.5.97 offsets
-	/*
-	inline static void InstallBowDrawnHook()
-	{
-		REL::Relocation<std::uintptr_t> BowDrawHook{ REL::ID(39375) , 0x6B6 };
-		REL::Relocation<std::uintptr_t> TestAlAl{ REL::ID(39375), 0x6BB };
-		std::array<std::uint8_t, 2> test{ 0x84, 0xC0 };
-
-		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_call<5>(BowDrawHook.address(), IsZoomed);
-
-		REL::safe_write<std::uint8_t>(TestAlAl.address(), test);
-		logger::info("Installed hook for bow drawn");	
-	}
-	*/
 
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
