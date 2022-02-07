@@ -5,10 +5,8 @@
   "homepage": "https://github.com/colinswrath/BladeAndBlunt",
   "license": "MIT",
   "dependencies": [
-    "boost-atomic",
     "boost-stl-interfaces",
     "rsm-binary-io",
-    "span-lite",
     "spdlog",
 	"simpleini"
   ]

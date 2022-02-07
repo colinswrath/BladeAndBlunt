@@ -1,7 +1,18 @@
 This is a CommonLib implementation of a .NETScriptFramework plugin originally written by KernalsEgg. 
 Much of the credit for the RE work goes to KernalsEgg.
 
-This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616. 
+This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616.
+
+##What does it do?
+**Adds specified spells in ini for the following scenarios:
+`IsAttacking`
+`IsBlocking`
+`IsSneaking`
+`When drawing bow` (used for bow stamina drain)
+
+**Includes engine fixes/changes for:
+`Movement speed for player scale` (Needs to be verified)
+`Block cap should use fBlockMax instead of fPlayerMaxResistance` (also needs to be verified)
 
 ## Requirements
 * [CMake](https://cmake.org/)

@@ -7,6 +7,7 @@ using namespace Conditions;
 class UpdateManager
 {
 public:
+	inline static int frameCount;
 	inline static void Install()
 	{
 		//1.6 = REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E };
@@ -15,6 +16,7 @@ public:
 		auto& trampoline = SKSE::GetTrampoline();
 		_OnFrameFunction = trampoline.write_call<5>(OnFrame_Update_Hook.address(), OnFrameUpdate);
 
+		UpdateManager::frameCount = 0;
 		logger::info("Installed hook for frame update");
 	}
 
@@ -39,10 +41,10 @@ public:
 
 
 		const std::int32_t fBlockOffset = static_cast<std::int32_t>(fBlock_GameSetting.address() - Block_GameSetting_Hook.address());
-
-		logger::info("fBlockOffset" + std::to_string(fBlockOffset));
-		
+	
 		REL::safe_write(Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
+
+		logger::info("Block max hook installed");
 	}
 	
 
@@ -50,68 +52,72 @@ private:
 	//TODO - CACHE THE PLAYER OFFSET
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
-
-		RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
-		auto settings = Settings::GetSingleton();
-		auto playerCamera = RE::PlayerCamera::GetSingleton();
-
-		if (IsBowDrawNoZoomCheck(player, playerCamera))
+		if (UpdateManager::frameCount > 9)
 		{
-			if (!HasSpell(player, settings->BowStaminaSpell))
+			UpdateManager::frameCount = 0;
+			logger::info(std::to_string(UpdateManager::frameCount));
+			RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
+			auto settings = Settings::GetSingleton();
+			auto playerCamera = RE::PlayerCamera::GetSingleton();
+
+			if (IsBowDrawNoZoomCheck(player, playerCamera))
 			{
-				player->AddSpell(settings->BowStaminaSpell);
+				if (!HasSpell(player, settings->BowStaminaSpell))
+				{
+					player->AddSpell(settings->BowStaminaSpell);
+				}
+			}
+			else
+			{
+				if (HasSpell(player, settings->BowStaminaSpell))
+				{
+					player->RemoveSpell(settings->BowStaminaSpell);
+				}
+			}
+
+			if (IsAttacking(player))
+			{
+				if (!HasSpell(player, settings->IsAttackingSpell))
+				{
+					player->AddSpell(settings->IsAttackingSpell);
+				}
+			}
+			else
+			{
+				if (HasSpell(player, settings->IsAttackingSpell))
+				{
+					player->RemoveSpell(settings->IsAttackingSpell);
+				}
+			}
+
+			if (IsBlocking(player))
+			{
+				if (!HasSpell(player, settings->IsBlockingSpell))
+				{
+					player->AddSpell(settings->IsBlockingSpell);
+				}
+			}
+			else
+			{
+				if (HasSpell(player, settings->IsBlockingSpell))
+				{
+					player->RemoveSpell(settings->IsBlockingSpell);
+				}
+			}
+
+			if (player->IsSneaking() && IsMoving(player))
+			{
+
+				if(!HasSpell(player, settings->IsSneakingSpell))
+					player->AddSpell(settings->IsSneakingSpell);
+			}
+			else
+			{
+				if(HasSpell(player, settings->IsSneakingSpell))
+					player->RemoveSpell(settings->IsSneakingSpell);
 			}
 		}
-		else
-		{
-			if (HasSpell(player, settings->BowStaminaSpell))
-			{
-				player->RemoveSpell(settings->BowStaminaSpell);
-			}
-		}
-
-		if (IsAttacking(player))
-		{
-			if (!HasSpell(player, settings->IsAttackingSpell))
-			{
-				player->AddSpell(settings->IsAttackingSpell);
-			}
-		}
-		else
-		{
-			if (HasSpell(player, settings->IsAttackingSpell))
-			{
-				player->RemoveSpell(settings->IsAttackingSpell);
-			}
-		}
-
-		if (IsBlocking(player))
-		{
-			if (!HasSpell(player, settings->IsBlockingSpell))
-			{
-				player->AddSpell(settings->IsBlockingSpell);
-			}
-		}
-		else
-		{
-			if (HasSpell(player, settings->IsBlockingSpell))
-			{
-				player->RemoveSpell(settings->IsBlockingSpell);
-			}
-		}
-
-		if (player->IsSneaking() && IsMoving(player))
-		{
-
-			if(!HasSpell(player, settings->IsSneakingSpell))
-				player->AddSpell(settings->IsSneakingSpell);
-		}
-		else
-		{
-			if(HasSpell(player, settings->IsSneakingSpell))
-				player->RemoveSpell(settings->IsSneakingSpell);
-		}
-
+		UpdateManager::frameCount++;
 		return _OnFrameFunction(a1);
 	}
 
@@ -131,7 +137,6 @@ private:
 
 	inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
 
-	//Checks for bow being drawn but not zoomed
 	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
 	{
 		auto attackState = player->GetAttackState();

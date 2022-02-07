@@ -56,6 +56,7 @@ RE::FormID Settings::ParseFormID(const std::string& str)
 
 void Settings::LoadForms()
 {
+	logger::info("Loading forms");
 	if (IsBlockingSpellFormId)
 		IsBlockingSpell = skyrim_cast<RE::SpellItem*>(RE::TESDataHandler::GetSingleton()->LookupForm(IsBlockingSpellFormId, FileName));
 
@@ -67,4 +68,6 @@ void Settings::LoadForms()
 
 	if(BowDrainStaminaFormId)
 		BowStaminaSpell = skyrim_cast<RE::SpellItem*>(RE::TESDataHandler::GetSingleton()->LookupForm(BowDrainStaminaFormId, FileName));
+	logger::info("Forms loaded");
+
 }

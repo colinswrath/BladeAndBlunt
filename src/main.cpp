@@ -1,7 +1,8 @@
 #include "Hooks.h"
 #include "Settings.h"
+#include "Cache.h"
 
-/*
+/*		1.6
 void InitLogger()
 {
 #ifndef NDEBUG
@@ -104,11 +105,12 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-	//InitLogger();
+	//InitLogger();	//1.6
 
 	SKSE::Init(a_skse);
 	logger::info("Loading Blade and Blunt.");
 	SKSE::AllocTrampoline(28);
+	Cache::CacheAddLibAddresss();
 	Hooks::Install();
 	Settings::GetSingleton()->LoadSettings();
 
