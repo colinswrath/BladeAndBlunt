@@ -3,7 +3,7 @@ Much of the credit for the RE work goes to KernalsEgg.
 
 This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616.
 
-##What does it do?
+##What does it do?  
 **Adds specified spells in ini for the following scenarios:**  
 `IsAttacking`  
 `IsBlocking`  
