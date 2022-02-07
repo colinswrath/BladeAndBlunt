@@ -8,10 +8,10 @@ This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616.
 `IsAttacking`  
 `IsBlocking`  
 `IsSneaking`  
-`When drawing bow` (used for bow stamina drain)  
+`When drawing bow`   
   
 **Includes engine fixes/changes for:**  
-`Movement speed for player scale` (Needs to be verified)  
+`Movement speed for player scale`  
 `Block cap should use fBlockMax instead of fPlayerMaxResistance` (also needs to be verified)  
 
 ## Requirements
