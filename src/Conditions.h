@@ -1,12 +1,15 @@
 #pragma once
-//TODO Hardcoded offsets, put into separate header.
+
 namespace Conditions
 {
-
-	static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::ID(410199) };
+	//1.6 = 410199
+	//1.5.97 = 523660
+	static REL::Relocation<float*> secondsSinceLastFrameWorldTime{ REL::ID(523660) };
 
 	static bool IsAttacking(RE::Actor* actor)
 	{
+		//1.6 = 38590
+		//1.5.97 = 37637
 		using func_t = decltype(&Conditions::IsAttacking);
 		REL::Relocation<func_t> func{ REL::ID(38590) };
 		return func(actor);
@@ -16,6 +19,8 @@ namespace Conditions
 
 	static bool IsBlocking(RE::Actor* actor)
 	{
+		//1.6 = 37952
+		//1.5.97 = 36927
 		using func_t = decltype(&Conditions::IsBlocking);
 		REL::Relocation<func_t> func{ REL::ID(37952) };
 		return func(actor);
@@ -25,6 +30,8 @@ namespace Conditions
 
 	static bool HasSpell(RE::Actor* actor, RE::SpellItem* spell)
 	{
+		//1.6 = 38782
+		//1.5.97 = 37828
 		using func_t = decltype(&Conditions::HasSpell);
 
 		REL::Relocation<func_t> func{ REL::ID(38782) };

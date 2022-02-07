@@ -9,7 +9,8 @@ class UpdateManager
 public:
 	inline static void Install()
 	{
-		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E};
+		//1.6 = REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E };
+		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(35565), 0x1E};
 		
 		auto& trampoline = SKSE::GetTrampoline();
 		_OnFrameFunction = trampoline.write_call<5>(OnFrame_Update_Hook.address(), OnFrameUpdate);
@@ -19,7 +20,8 @@ public:
 
 	inline static void InstallScalePatch()
 	{
-		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
+		//1.6 = REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
+		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(37013), 0x1A };
 		
 		auto& trampoline = SKSE::GetTrampoline();
 		_GetScaleFunction = trampoline.write_call<5>(Scale_Patch_Hook.address(), GetScale);
@@ -27,7 +29,25 @@ public:
 		logger::info("Installed hook for scale patch");
 	}
 
+	inline static void InstallFBlockPatch()
+	{
+		//1.6 = REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(44014), 0x438 };
+		//1.6 = REL::Relocation<std::uintptr_t> fBlock_GameSetting { REL::ID(374158) };
+
+		REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(42842), 0x452 };
+		REL::Relocation<std::uintptr_t> fBlock_GameSetting{ REL::ID(505023) };
+
+
+		const std::int32_t fBlockOffset = static_cast<std::int32_t>(fBlock_GameSetting.address() - Block_GameSetting_Hook.address());
+
+		logger::info("fBlockOffset" + std::to_string(fBlockOffset));
+		
+		REL::safe_write(Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
+	}
+	
+
 private:
+	//TODO - CACHE THE PLAYER OFFSET
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
 
@@ -123,36 +143,36 @@ private:
 
 		switch (attackState)
 		{
-		case RE::ATTACK_STATE_ENUM::kBowDrawn:
-		{
-			auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+			case RE::ATTACK_STATE_ENUM::kBowDrawn:
+			{
+				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
 
-			if (!equippedWeapon)
-			{			
+				if (!equippedWeapon)
+				{			
+					break;
+				}
+
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow || equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow)
+				{
+					return true;
+				}
 				break;
 			}
-
-			if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow || equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow)
+			case RE::ATTACK_STATE_ENUM::kBowAttached:
 			{
-				return true;
-			}
-			break;
-		}
-		case RE::ATTACK_STATE_ENUM::kBowAttached:
-		{
-			auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
 
-			if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow)
-			{
-				return true;
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow)
+				{
+					return true;
+				}
+				break;
 			}
-			break;
-		}
 		
-		default:
-		{
-			break;
-		}
+			default:
+			{
+				break;
+			}
 		}
 		return false;
 	}

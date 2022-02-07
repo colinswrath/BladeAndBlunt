@@ -6,6 +6,7 @@ namespace Hooks
 	{
 		UpdateManager::Install();
 		UpdateManager::InstallScalePatch();
+		UpdateManager::InstallFBlockPatch();
 		logger::info("Update hook installed.");
 	}
 }
