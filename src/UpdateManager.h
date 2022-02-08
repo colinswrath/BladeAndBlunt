@@ -52,7 +52,7 @@ private:
 	//TODO - CACHE THE PLAYER OFFSET
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
-		if (UpdateManager::frameCount > 9)
+		if (UpdateManager::frameCount > 4)
 		{
 			UpdateManager::frameCount = 0;
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();

@@ -25,4 +25,10 @@ namespace Cache
 		//1.5 = 517014
 		PlayerSingletonAddress = REL::ID(517014).address();
 	}
+
+	inline RE::PlayerCharacter* GetPlayerSingleton()
+	{
+		REL::Relocation<RE::NiPointer<RE::PlayerCharacter>*> singleton{ PlayerSingletonAddress };
+		return singleton->get();
+	}
 }
