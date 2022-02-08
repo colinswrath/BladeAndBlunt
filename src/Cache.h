@@ -5,6 +5,7 @@ namespace Cache
 	inline uintptr_t IsAttackingAddress;
 	inline uintptr_t IsBlockingAddress;
 	inline uintptr_t HasSpellAddress;
+	inline uintptr_t PlayerSingletonAddress;
 
 	inline void CacheAddLibAddresss()
 	{
@@ -19,5 +20,9 @@ namespace Cache
 		//1.6 = 38782
 		//1.5.97 = 37828
 		HasSpellAddress = REL::ID(37828).address();
+
+		//1.6 = 403521
+		//1.5 = 517014
+		PlayerSingletonAddress = REL::ID(517014).address();
 	}
 }

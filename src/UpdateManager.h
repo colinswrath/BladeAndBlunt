@@ -55,7 +55,7 @@ private:
 		if (UpdateManager::frameCount > 9)
 		{
 			UpdateManager::frameCount = 0;
-			RE::PlayerCharacter* player = RE::PlayerCharacter::GetSingleton();
+			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 			auto settings = Settings::GetSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
