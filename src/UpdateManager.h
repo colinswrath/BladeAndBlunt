@@ -37,10 +37,10 @@ public:
 		//1.6 = REL::Relocation<std::uintptr_t> fBlock_GameSetting { REL::ID(374158) };
 
 		REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(42842), 0x452 };
-		REL::Relocation<std::uintptr_t> fBlock_GameSetting{ REL::ID(505023) };
+		REL::Relocation<std::uintptr_t> fBlock_GameSetting{ REL::ID(505023), 0x8 };
 
-		const std::int32_t fBlockOffset = static_cast<std::int32_t>(fBlock_GameSetting.address() - Block_GameSetting_Hook.address());
-	
+		const std::int32_t fBlockOffset = static_cast<std::int32_t>(fBlock_GameSetting.address() - (Block_GameSetting_Hook.address() + 0x8));
+		
 		REL::safe_write(Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
 
 		logger::info("Block max hook installed");
@@ -48,12 +48,12 @@ public:
 
 	inline static void InstallSpellCapPatch()
 	{
-		std::uint8_t noopPatch[] = { 0x90, 0x90, 0x90 };
 		// 1.6 REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(38741), 0x55 };
+		std::uint8_t noopPatch[] = { 0x90, 0x90, 0x90 };
 		REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(37792), 0x53};
 
 		auto& trampoline = SKSE::GetTrampoline();
-		_AbsorbCapFunction = trampoline.write_call<5>(SpellCap_Hook.address(), AbsorbCapPatch);
+		trampoline.write_call<5>(SpellCap_Hook.address(), AbsorbCapPatch);
 		REL::safe_write(SpellCap_Hook.address() + 0x5, noopPatch, 3);
 
 		logger::info("Absorb cap hook installed.");
@@ -193,15 +193,13 @@ private:
 		return false;
 	}
 
-	inline static std::int32_t AbsorbCapPatch(RE::MagicTarget *aMagicTarget, RE::ActorValue akValue)
-	{
-		logger::info("Absorb");
-		auto cap = _AbsorbCapFunction(aMagicTarget, akValue);
-
-		float playerMax = RE::GameSettingCollection::GetSingleton()->GetSetting("fPlayerMaxResistance")->GetFloat();
+	inline static std::int32_t AbsorbCapPatch(RE::ActorValueOwner *akAvOwner, RE::ActorValue akValue)
+	{			
+		auto cap = (int32_t)akAvOwner->GetActorValue(akValue);
+			
+		float playerMax = Cache::GetfPlayerMaxResistSingleton()->GetFloat();
+	
 		auto max = (int32_t)playerMax;
-
-		logger::info("Player max" + std::to_string(playerMax));
 		
 		if (cap > playerMax)
 		{
@@ -210,10 +208,6 @@ private:
 		else
 		{
 			return cap;
-		}
+		}	
 	}
-
-	inline static REL::Relocation<decltype(AbsorbCapPatch)> _AbsorbCapFunction;
-
-
 };
