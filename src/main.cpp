@@ -109,7 +109,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 	logger::info("Loading Blade and Blunt.");
-	SKSE::AllocTrampoline(28);
+	SKSE::AllocTrampoline(42);
 	Cache::CacheAddLibAddresss();
 	Hooks::Install();
 	Settings::GetSingleton()->LoadSettings();
