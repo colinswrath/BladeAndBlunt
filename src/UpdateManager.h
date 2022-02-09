@@ -8,7 +8,7 @@ class UpdateManager
 {
 public:
 	inline static int frameCount;
-	inline static void Install()
+	inline static bool Install()
 	{
 		//1.6 = REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E };
 		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(35565), 0x1E};
@@ -18,9 +18,10 @@ public:
 
 		UpdateManager::frameCount = 0;
 		logger::info("Installed hook for frame update");
+		return true;
 	}
 
-	inline static void InstallScalePatch()
+	inline static bool InstallScalePatch()
 	{
 		//1.6 = REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
 		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(37013), 0x1A };
@@ -29,9 +30,10 @@ public:
 		_GetScaleFunction = trampoline.write_call<5>(Scale_Patch_Hook.address(), GetScale);
 
 		logger::info("Installed hook for scale patch");
+		return true;
 	}
 
-	inline static void InstallFBlockPatch()
+	inline static bool InstallFBlockPatch()
 	{
 		//1.6 = REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(44014), 0x438 };
 		//1.6 = REL::Relocation<std::uintptr_t> fBlock_GameSetting { REL::ID(374158) };
@@ -44,12 +46,14 @@ public:
 		REL::safe_write(Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
 
 		logger::info("Block max hook installed");
+		return true;
 	}
 
-	inline static void InstallSpellCapPatch()
+	inline static bool InstallSpellCapPatch()
 	{
-		// 1.6 REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(38741), 0x55 };
 		std::uint8_t noopPatch[] = { 0x90, 0x90, 0x90 };
+
+		// 1.6 REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(38741), 0x55 };
 		REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(37792), 0x53};
 
 		auto& trampoline = SKSE::GetTrampoline();
@@ -57,6 +61,7 @@ public:
 		REL::safe_write(SpellCap_Hook.address() + 0x5, noopPatch, 3);
 
 		logger::info("Absorb cap hook installed.");
+		return true;
 	}
 	
 
@@ -196,9 +201,7 @@ private:
 	inline static std::int32_t AbsorbCapPatch(RE::ActorValueOwner *akAvOwner, RE::ActorValue akValue)
 	{			
 		auto cap = (int32_t)akAvOwner->GetActorValue(akValue);
-			
 		float playerMax = Cache::GetfPlayerMaxResistSingleton()->GetFloat();
-	
 		auto max = (int32_t)playerMax;
 		
 		if (cap > playerMax)

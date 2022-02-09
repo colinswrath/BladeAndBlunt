@@ -111,7 +111,12 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("Loading Blade and Blunt.");
 	SKSE::AllocTrampoline(42);
 	Cache::CacheAddLibAddresses();
-	Hooks::Install();
+	if (!Hooks::Install())
+	{
+		logger::error("Hook installation failed.");
+		return false;
+	}
+
 	Settings::GetSingleton()->LoadSettings();
 
 	auto messaging = SKSE::GetMessagingInterface();

@@ -2,11 +2,11 @@
 
 namespace Hooks
 {
-	void Install()
+	bool Install()
 	{
-		UpdateManager::Install();
-		UpdateManager::InstallScalePatch();
-		UpdateManager::InstallFBlockPatch();
-		UpdateManager::InstallSpellCapPatch();
+		if (!UpdateManager::Install()) { return false; }
+		if (!UpdateManager::InstallScalePatch()) { return false; }
+		if (!UpdateManager::InstallFBlockPatch()) { return false; }
+		if (!UpdateManager::InstallSpellCapPatch()) { return false; }
 	}
 }
