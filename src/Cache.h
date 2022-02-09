@@ -1,12 +1,15 @@
 #pragma once
 
 namespace Cache
-{
+{//Stores cache and offsets for plugin
+
 	inline uintptr_t IsAttackingAddress;
 	inline uintptr_t IsBlockingAddress;
 	inline uintptr_t HasSpellAddress;
 	inline uintptr_t PlayerSingletonAddress;
 	inline uintptr_t fPlayerMaxResistanceAddress;
+
+
 
 	inline void CacheAddLibAddresses()
 	{

@@ -2,6 +2,7 @@
 
 #include "Conditions.h"
 #include "Settings.h"
+#include "Hooks.h"
 
 using namespace Conditions;
 class UpdateManager
@@ -10,11 +11,8 @@ public:
 	inline static int frameCount;
 	inline static bool Install()
 	{
-		//1.6 = REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(36564), 0x6E };
-		REL::Relocation<std::uintptr_t> OnFrame_Update_Hook{ REL::ID(35565), 0x1E};
-		
 		auto& trampoline = SKSE::GetTrampoline();
-		_OnFrameFunction = trampoline.write_call<5>(OnFrame_Update_Hook.address(), OnFrameUpdate);
+		_OnFrameFunction = trampoline.write_call<5>(Hooks::OnFrame_Update_Hook.address(), OnFrameUpdate);
 
 		UpdateManager::frameCount = 0;
 		logger::info("Installed hook for frame update");
@@ -22,12 +20,9 @@ public:
 	}
 
 	inline static bool InstallScalePatch()
-	{
-		//1.6 = REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(38041), 0x1F };
-		REL::Relocation<std::uintptr_t> Scale_Patch_Hook{ REL::ID(37013), 0x1A };
-		
+	{	
 		auto& trampoline = SKSE::GetTrampoline();
-		_GetScaleFunction = trampoline.write_call<5>(Scale_Patch_Hook.address(), GetScale);
+		_GetScaleFunction = trampoline.write_call<5>(Hooks::Scale_Patch_Hook.address(), GetScale);
 
 		logger::info("Installed hook for scale patch");
 		return true;
@@ -35,15 +30,9 @@ public:
 
 	inline static bool InstallFBlockPatch()
 	{
-		//1.6 = REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(44014), 0x438 };
-		//1.6 = REL::Relocation<std::uintptr_t> fBlock_GameSetting { REL::ID(374158) };
-
-		REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::ID(42842), 0x452 };
-		REL::Relocation<std::uintptr_t> fBlock_GameSetting{ REL::ID(505023), 0x8 };
-
-		const std::int32_t fBlockOffset = static_cast<std::int32_t>(fBlock_GameSetting.address() - (Block_GameSetting_Hook.address() + 0x8));
+		const std::int32_t fBlockOffset = static_cast<std::int32_t>(Hooks::fBlock_GameSetting.address() - (Hooks::Block_GameSetting_Hook.address() + 0x8));
 		
-		REL::safe_write(Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
+		REL::safe_write(Hooks::Block_GameSetting_Hook.address() + 0x4, fBlockOffset);
 
 		logger::info("Block max hook installed");
 		return true;
@@ -51,14 +40,18 @@ public:
 
 	inline static bool InstallSpellCapPatch()
 	{
+		const std::uint8_t expectedBytes[] = {0x41, 0xFF, 0x50, 0x08, 0xF3, 0x0F, 0x2C, 0xC0};
 		std::uint8_t noopPatch[] = { 0x90, 0x90, 0x90 };
 
-		// 1.6 REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(38741), 0x55 };
-		REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::ID(37792), 0x53};
+		if (std::memcmp(reinterpret_cast<std::uint8_t*>(static_cast<std::uintptr_t>(Hooks::SpellCap_Hook.address())), expectedBytes, sizeof(expectedBytes)))
+		{
+			logger::error("ERROR: Expected byte mismatch on Spell Absorb Cap hook");
+			return false;
+		}
 
 		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_call<5>(SpellCap_Hook.address(), AbsorbCapPatch);
-		REL::safe_write(SpellCap_Hook.address() + 0x5, noopPatch, 3);
+		trampoline.write_call<5>(Hooks::SpellCap_Hook.address(), AbsorbCapPatch);
+		REL::safe_write(Hooks::SpellCap_Hook.address() + 0x5, noopPatch, 3);
 
 		logger::info("Absorb cap hook installed.");
 		return true;
