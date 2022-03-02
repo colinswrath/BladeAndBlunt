@@ -182,7 +182,7 @@ if (MSVC)
 			/WX	# Warning level (warnings are errors)
 
 			"$<$<CONFIG:DEBUG>:>"
-			"$<$<CONFIG:RELEASE>:/Zc:inline;/JMC-;/Ob3>"
+			"$<$<CONFIG:RELEASE>:/Zc:inline;/JMC-;/Ob3;/O2;/DNDEBUG;/Gy;/Zi>"
 	)
 
 	target_link_options(
