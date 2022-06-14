@@ -12,23 +12,23 @@ namespace Cache
 	{
 		//1.6 = 38590
 		//1.5.97 = 37637
-		IsAttackingAddress = REL::ID(37637).address();
+		IsAttackingAddress = REL::RelocationID(37637, 38590).address();
 
 		//1.6 = 37952
 		//1.5.97 = 36927
-		IsBlockingAddress = REL::ID(36927).address();
+		IsBlockingAddress = REL::RelocationID(36927, 37952).address();
 
 		//1.6 = 38782
 		//1.5.97 = 37828
-		HasSpellAddress = REL::ID(37828).address();
+		HasSpellAddress = REL::RelocationID(37828, 38782).address();
 
 		//1.6 = 403521
 		//1.5 = 517014
-		PlayerSingletonAddress = REL::ID(517014).address();
+		PlayerSingletonAddress = REL::RelocationID(517014, 403521).address();
 
-		//1.6
+		//1.6 = 375300
 		//1.5 = 505721
-		fPlayerMaxResistanceAddress = { REL::ID(505721).address()};
+		fPlayerMaxResistanceAddress = { REL::RelocationID(505721, 375300).address()};
 	}
 
 	inline RE::PlayerCharacter* GetPlayerSingleton()

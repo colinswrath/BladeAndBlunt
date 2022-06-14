@@ -96,20 +96,20 @@ private:
 				{
 					player->RemoveSpell(settings->IsAttackingSpell);
 				}
-			}
 
-			if (IsBlocking(player))
-			{
-				if (!HasSpell(player, settings->IsBlockingSpell))
+				if (IsBlocking(player))
 				{
-					player->AddSpell(settings->IsBlockingSpell);
+					if (!HasSpell(player, settings->IsBlockingSpell))
+					{
+						player->AddSpell(settings->IsBlockingSpell);
+					}
 				}
-			}
-			else
-			{
-				if (HasSpell(player, settings->IsBlockingSpell))
+				else
 				{
-					player->RemoveSpell(settings->IsBlockingSpell);
+					if (HasSpell(player, settings->IsBlockingSpell))
+					{
+						player->RemoveSpell(settings->IsBlockingSpell);
+					}
 				}
 			}
 
