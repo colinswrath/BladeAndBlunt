@@ -79,8 +79,9 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # ---- Dependencies ----
 
-add_subdirectory("extern/CommonLibSSE" CommonLibSSE)
+#add_subdirectory("extern/CommonLibSSE" CommonLibSSE)
 
+find_package(CommonLibSSE REQUIRED)
 find_package(spdlog REQUIRED CONFIG)
 
 # ---- Add source files ----
@@ -138,9 +139,8 @@ target_include_directories(
 
 target_link_libraries(
 	${PROJECT_NAME}
-	PRIVATE
+	PUBLIC
 		CommonLibSSE::CommonLibSSE
-		spdlog::spdlog
 )
 
 if (MSVC)
