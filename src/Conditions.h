@@ -33,6 +33,7 @@ namespace Conditions
 
 	static bool IsMoving(RE::PlayerCharacter* player)
 	{
-		return (static_cast<bool>(player->actorState1.movingForward) || static_cast<bool>(player->actorState1.movingBack) || static_cast<bool>(player->actorState1.movingLeft) || static_cast<bool>(player->actorState1.movingRight));
+		auto playerState = player->AsActorState();
+		return (static_cast<bool>(playerState->actorState1.movingForward) || static_cast<bool>(playerState->actorState1.movingBack) || static_cast<bool>(playerState->actorState1.movingLeft) || static_cast<bool>(playerState->actorState1.movingRight));
 	}
 };

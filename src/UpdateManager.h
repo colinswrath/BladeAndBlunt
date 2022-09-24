@@ -136,7 +136,8 @@ private:
 		auto scale = _GetScaleFunction(a1);
 		if(skyrim_cast<RE::Actor*>(a1) == RE::PlayerCharacter::GetSingleton())
 		{
-			return a1->refScale / 100.0f;
+			
+			return a1->GetReferenceRuntimeData().refScale / 100.0f;
 		}
 		else
 		{
@@ -148,7 +149,7 @@ private:
 
 	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
 	{
-		auto attackState = player->GetAttackState();
+		auto attackState = player->AsActorState()->GetAttackState();
 
 		if (playerCamera->bowZoomedIn)
 		{
