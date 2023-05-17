@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Conditions.h"
-#include "Settings.h"
 #include "Hooks.h"
 
 using namespace Conditions;
@@ -61,44 +60,41 @@ public:
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
-		if (UpdateManager::frameCount > 4)
+		if (UpdateManager::frameCount > 6)
 		{
 			UpdateManager::frameCount = 0;
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 			auto settings = Settings::GetSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
-			if (IsBowDrawNoZoomCheck(player, playerCamera))
-			{
-				if (!HasSpell(player, settings->BowStaminaSpell))
-				{
+			if (IsBowDrawNoZoomCheck(player, playerCamera)) {
+				if (!HasSpell(player, settings->BowStaminaSpell)) {
 					player->AddSpell(settings->BowStaminaSpell);
 				}
 			}
-			else
-			{
-				if (HasSpell(player, settings->BowStaminaSpell))
-				{
+			else if (HasSpell(player, settings->BowStaminaSpell)) {
 					player->RemoveSpell(settings->BowStaminaSpell);
-				}
 			}
 
-			if (IsAttacking(player))
-			{
-				if (!HasSpell(player, settings->IsAttackingSpell))
-				{
+			if (IsAttacking(player)) {
+				if (!HasSpell(player, settings->IsAttackingSpell)) {
 					player->AddSpell(settings->IsAttackingSpell);
 				}
 			}
-			else
-			{
+			else {
 				if (HasSpell(player, settings->IsAttackingSpell))
 				{
 					player->RemoveSpell(settings->IsAttackingSpell);
 				}
 
-				if (IsBlocking(player))
-				{
+				if (IsBlocking(player)) {
+					auto leftHand = player->GetEquippedObject(true);
+					//Parry setup
+					if ((!leftHand || leftHand->IsWeapon()) && !settings->IsBlockingWeaponSpellCasted) {
+						settings->IsBlockingWeaponSpellCasted = true;
+						Conditions::ApplySpell(player, player, settings->MAGParryControllerSpell);
+					}
+
 					if (!HasSpell(player, settings->IsBlockingSpell))
 					{
 						player->AddSpell(settings->IsBlockingSpell);
@@ -106,22 +102,19 @@ private:
 				}
 				else
 				{
-					if (HasSpell(player, settings->IsBlockingSpell))
-					{
+					if (HasSpell(player, settings->IsBlockingSpell)) {
 						player->RemoveSpell(settings->IsBlockingSpell);
 					}
+					settings->IsBlockingWeaponSpellCasted = false;
 				}
 			}
 
 			if (player->IsSneaking() && IsMoving(player))
 			{
-
-				if(!HasSpell(player, settings->IsSneakingSpell))
+				if(!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
 					player->AddSpell(settings->IsSneakingSpell);
 			}
-			else
-			{
-				if(HasSpell(player, settings->IsSneakingSpell))
+			else if(HasSpell(player, settings->IsSneakingSpell)) {
 					player->RemoveSpell(settings->IsSneakingSpell);
 			}
 		}

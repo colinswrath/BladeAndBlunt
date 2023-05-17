@@ -61,6 +61,7 @@ endif()
 
 if (MSVC)
 	add_compile_definitions(
+		SKSE_SUPPORT_XBYAK
 		_UNICODE
 	)
 
@@ -96,6 +97,9 @@ set(SOURCES
 	src/UpdateManager.h
 	src/Conditions.h
 	src/Cache.h
+	src/Events.h
+	src/BashBlockStaminaPatch.h
+	src/ArmorRatingScaling.h
 )
 
 source_group(

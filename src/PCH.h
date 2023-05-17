@@ -2,6 +2,7 @@
 
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
+#include <xbyak/xbyak.h>
 
 #pragma warning(push)
 #ifdef NDEBUG
