@@ -5,6 +5,7 @@ public:
 
 	void LoadSettings();
 	void LoadForms();
+	void AdjustWeaponStaggerVals();
 
 	RE::FormID IsAttackingSpellFormId;
 	RE::FormID IsBlockingSpellFormId;
@@ -25,6 +26,7 @@ public:
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
 	RE::SpellItem* MAGParryControllerSpell;
+	RE::SpellItem* MAGCrossbowStaminaDrainSpell;
 
 	RE::SpellItem* InjurySpell1;
 	RE::SpellItem* InjurySpell2;
@@ -48,6 +50,7 @@ public:
 	bool enableInjuries;
 	bool enableSneakStaminaCost;
 	bool enableLevelDifficulty;
+	bool zeroAllWeapStamina;
 
 	bool IsBlockingWeaponSpellCasted = false;
 

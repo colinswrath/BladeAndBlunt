@@ -1,6 +1,7 @@
 #include "UpdateManager.h"
 #include "ArmorRatingScaling.h"
 #include "BashBlockStaminaPatch.h"
+#include "Events.h"
 
 namespace Hooks
 {
@@ -10,6 +11,8 @@ namespace Hooks
 		if (!UpdateManager::InstallScalePatch()) { return false; }
 		if (!UpdateManager::InstallFBlockPatch()) { return false; }
 		if (!UpdateManager::InstallSpellCapPatch()) { return false; }
+		
+		WeaponFireHandler::InstallArrowReleaseHook();
 
 		auto runtime = REL::Module::GetRuntime();
 		if (runtime == REL::Module::Runtime::AE) {

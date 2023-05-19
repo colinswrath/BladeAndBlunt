@@ -176,3 +176,33 @@ public:
 		eventHolder->AddEventSink(OnHitEventHandler::GetSingleton());
 	}
 };
+
+class WeaponFireHandler
+{
+public:
+	static void InstallArrowReleaseHook() {
+		logger::info("Writing arrow release handler hook");
+
+		auto& trampoline = SKSE::GetTrampoline();
+		_Weapon_Fire = trampoline.write_call<5>(Hooks::arrow_release_handler.address(), WeaponFire);
+		
+		logger::info("Release arrow hooked");
+	}
+
+	static void WeaponFire(RE::TESObjectWEAP* a_weapon, RE::TESObjectREFR* a_source, RE::TESAmmo* a_ammo, RE::EnchantmentItem* a_ammoEnchantment, RE::AlchemyItem* a_poison)
+	{
+		_Weapon_Fire(a_weapon, a_source, a_ammo, a_ammoEnchantment, a_poison);
+
+		if (!a_source) {
+			return;
+		}
+
+		auto source = a_source->As<RE::Actor>();
+
+		if (source->IsPlayerRef() && a_weapon->IsCrossbow()) {
+			Conditions::ApplySpell(source, source,Settings::GetSingleton()->MAGCrossbowStaminaDrainSpell);
+		}
+	}
+	inline static REL::Relocation<decltype(WeaponFire)> _Weapon_Fire;
+};
+

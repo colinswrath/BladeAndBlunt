@@ -149,34 +149,27 @@ private:
 			return false;
 		}
 
+		auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+		if (!equippedWeapon) {
+			return false;
+		}
+
 		switch (attackState)
 		{
-			case RE::ATTACK_STATE_ENUM::kBowDrawn:
-			{
-				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
-
-				if (!equippedWeapon)
-				{			
-					break;
-				}
-
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow || equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow)
-				{
+			case RE::ATTACK_STATE_ENUM::kBowDrawn:{
+				
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow && equippedWeapon->GetWeaponType() != RE::WEAPON_TYPE::kCrossbow){
 					return true;
 				}
 				break;
 			}
-			case RE::ATTACK_STATE_ENUM::kBowAttached:
-			{
-				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+			case RE::ATTACK_STATE_ENUM::kBowAttached:{
 
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow)
-				{
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow) {
 					return true;
 				}
 				break;
 			}
-		
 			default:
 			{
 				break;

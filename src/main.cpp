@@ -82,7 +82,12 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
-		Settings::GetSingleton()->LoadForms();
+		auto settings = Settings::GetSingleton();
+		if (settings) {
+			settings->LoadForms();
+			settings->AdjustWeaponStaggerVals();
+		}
+
 		break;
 	}
 }
