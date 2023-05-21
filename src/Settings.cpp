@@ -18,14 +18,17 @@ void Settings::LoadSettings()
 	enableSneakStaminaCost = ini.GetBoolValue("", "bEnableSneakStaminaCost", true);
 	enableLevelDifficulty = ini.GetBoolValue("", "bLevelBasedDifficulty", true);
 	zeroAllWeapStamina = ini.GetBoolValue("", "bZeroAllWeaponStamina", true);
+	armorScalingEnabled = ini.GetBoolValue("", "bArmorRatingScalingEnabled", true);
 
 	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
 	std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
 	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
 	std::string bowStaminaSpellFormID((ini.GetValue("", "BowStaminaSpellFormId", "")));
+	std::string xbowStaminaSpellFormID((ini.GetValue("", "XbowStaminaSpellFormId", "")));
 	std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
 	std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
 	std::string blockStaggerPerkFormId((ini.GetValue("", "BlockStaggerPerkFormId", "")));
+
 	std::string injurySpell1FormID((ini.GetValue("", "InjurySpell1FormID", "")));
 	std::string injurySpell2FormID((ini.GetValue("", "InjurySpell2FormID", "")));
 	std::string injurySpell3FormID((ini.GetValue("", "InjurySpell3FormID", "")));
@@ -48,6 +51,10 @@ void Settings::LoadSettings()
 
 	if (!bowStaminaSpellFormID.empty()){
 		BowDrainStaminaFormId = ParseFormID(bowStaminaSpellFormID);
+	}
+
+	if (!xbowStaminaSpellFormID.empty()) {
+		XbowDrainStaminaFormId = ParseFormID(xbowStaminaSpellFormID);
 	}
 
 	if (!bashPerkFormId.empty()) {
@@ -119,6 +126,9 @@ void Settings::LoadForms()
 
 	if(BowDrainStaminaFormId)
 		BowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(BowDrainStaminaFormId, FileName));
+
+	if (XbowDrainStaminaFormId)
+		XbowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(XbowDrainStaminaFormId, FileName));
 
 	if (BashPerkFormId)
 		BashStaminaPerk = dataHandler->LookupForm(BashPerkFormId, "Update.esm")->As<RE::BGSPerk>();

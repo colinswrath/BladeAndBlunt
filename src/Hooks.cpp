@@ -15,10 +15,12 @@ namespace Hooks
 		WeaponFireHandler::InstallArrowReleaseHook();
 
 		auto runtime = REL::Module::GetRuntime();
-		if (runtime == REL::Module::Runtime::AE) {
-			ArmorRatingScaling::InstallArmorRatingHookAE();
-		} else {
-			ArmorRatingScaling::InstallArmorRatingHookSE();	
+		if (Settings::GetSingleton()->armorScalingEnabled) {
+			if (runtime == REL::Module::Runtime::AE) {
+				ArmorRatingScaling::InstallArmorRatingHookAE();
+			} else {
+				ArmorRatingScaling::InstallArmorRatingHookSE();	
+			}
 		}
 
 		if (!BashBlockStaminaPatch::InstallBlockMultHook()) {

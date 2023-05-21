@@ -73,7 +73,15 @@ private:
 				}
 			}
 			else if (HasSpell(player, settings->BowStaminaSpell)) {
-					player->RemoveSpell(settings->BowStaminaSpell);
+				player->RemoveSpell(settings->BowStaminaSpell);
+			}
+
+			if (IsXbowDrawCheck(player, playerCamera)) {
+				if (!HasSpell(player, settings->XbowStaminaSpell)) {
+					player->AddSpell(settings->XbowStaminaSpell);
+				}
+			} else if (HasSpell(player, settings->XbowStaminaSpell)) {
+				player->RemoveSpell(settings->XbowStaminaSpell);
 			}
 
 			if (IsAttacking(player)) {
@@ -129,7 +137,6 @@ private:
 		auto scale = _GetScaleFunction(a1);
 		if(skyrim_cast<RE::Actor*>(a1) == RE::PlayerCharacter::GetSingleton())
 		{
-			
 			return a1->GetReferenceRuntimeData().refScale / 100.0f;
 		}
 		else
@@ -139,6 +146,35 @@ private:
 	}
 
 	inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
+
+	static bool IsXbowDrawCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
+	{
+		auto attackState = player->AsActorState()->GetAttackState();
+
+		if (playerCamera->bowZoomedIn) {
+			return false;
+		}
+
+		auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+		if (!equippedWeapon) {
+			return false;
+		}
+
+		switch (attackState) {
+			case RE::ATTACK_STATE_ENUM::kBowDrawn:
+			{
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow) {
+					return true;
+				}
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		return false;
+	}
 
 	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
 	{
@@ -154,11 +190,10 @@ private:
 			return false;
 		}
 
-		switch (attackState)
-		{
+		switch (attackState) {
 			case RE::ATTACK_STATE_ENUM::kBowDrawn:{
 				
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow && equippedWeapon->GetWeaponType() != RE::WEAPON_TYPE::kCrossbow){
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow){
 					return true;
 				}
 				break;

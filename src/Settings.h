@@ -11,6 +11,7 @@ public:
 	RE::FormID IsBlockingSpellFormId;
 	RE::FormID IsSneakingSpellFormId;
 	RE::FormID BowDrainStaminaFormId;
+	RE::FormID XbowDrainStaminaFormId;
 	RE::FormID BashPerkFormId;
 	RE::FormID BlockPerkFormId;
 	RE::FormID BlockStaggerPerkFormId;
@@ -22,6 +23,7 @@ public:
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
 	RE::SpellItem* BowStaminaSpell;
+	RE::SpellItem* XbowStaminaSpell;
 	RE::SpellItem* MAGParryStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
@@ -51,6 +53,7 @@ public:
 	bool enableSneakStaminaCost;
 	bool enableLevelDifficulty;
 	bool zeroAllWeapStamina;
+	bool armorScalingEnabled;
 
 	bool IsBlockingWeaponSpellCasted = false;
 
