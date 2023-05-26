@@ -9,6 +9,7 @@
     "rsm-binary-io",
     "spdlog",
 	"simpleini",
-	"commonlibsse-ng"
+	"commonlibsse-ng",
+	"xbyak"
   ]
 }

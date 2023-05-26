@@ -1,6 +1,6 @@
 #include "Hooks.h"
-#include "Settings.h"
 #include "Cache.h"
+#include "Events.h"
 
 void InitLogger()
 {
@@ -22,7 +22,7 @@ void InitLogger()
 	log->set_level(spdlog::level::trace);
 #else
 	log->set_level(spdlog::level::info);
-	log->flush_on(spdlog::level::warn);
+	log->flush_on(spdlog::level::info);
 #endif
 
 	spdlog::set_default_logger(std::move(log));
@@ -68,13 +68,27 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
 {
+	auto settings = Settings::GetSingleton();
 	switch (a_msg->type)
 	{
 	case SKSE::MessagingInterface::kNewGame:
+	case SKSE::MessagingInterface::kPostLoadGame:
 		Settings::GetSingleton()->LoadForms();
 		break;
+	case SKSE::MessagingInterface::kPostLoad:
+		if (!Hooks::InstallBashMultHook()) {
+			logger::error("Bash hook installation failed.");
+		} else {
+			logger::info("Bash hook installed");
+		}
+
+		break;
 	case SKSE::MessagingInterface::kDataLoaded:
-		Settings::GetSingleton()->LoadForms();
+		if (settings) {
+			settings->LoadForms();
+			settings->AdjustWeaponStaggerVals();
+		}
+
 		break;
 	}
 }
@@ -85,14 +99,15 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 	logger::info("Loading Blade and Blunt.");
-	SKSE::AllocTrampoline(42);
+	SKSE::AllocTrampoline(320);
 	Cache::CacheAddLibAddresses();
-	if (!Hooks::Install())
+	if (!Hooks::InstallHooks())
 	{
 		logger::error("Hook installation failed.");
 		return false;
 	}
 
+	OnHitEventHandler::Register();
 	Settings::GetSingleton()->LoadSettings();
 
 	auto messaging = SKSE::GetMessagingInterface();

@@ -7,6 +7,8 @@ namespace Cache
 	inline uintptr_t HasSpellAddress;
 	inline uintptr_t PlayerSingletonAddress;
 	inline uintptr_t fPlayerMaxResistanceAddress;
+	inline uintptr_t getUnarmedWeaponAddress;
+	static float& g_deltaTime = (*(float*)RELOCATION_ID(523660, 410199).address());
 
 	inline void CacheAddLibAddresses()
 	{
@@ -29,6 +31,8 @@ namespace Cache
 		//1.6 = 375300
 		//1.5 = 505721
 		fPlayerMaxResistanceAddress = { REL::RelocationID(505721, 375300).address()};
+
+		getUnarmedWeaponAddress = { REL::RelocationID(514923, 401061).address() };
 	}
 
 	inline RE::PlayerCharacter* GetPlayerSingleton()

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Conditions.h"
-#include "Settings.h"
 #include "Hooks.h"
 
 using namespace Conditions;
@@ -61,44 +60,49 @@ public:
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
-		if (UpdateManager::frameCount > 4)
+		if (UpdateManager::frameCount > 6)
 		{
 			UpdateManager::frameCount = 0;
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 			auto settings = Settings::GetSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
-			if (IsBowDrawNoZoomCheck(player, playerCamera))
-			{
-				if (!HasSpell(player, settings->BowStaminaSpell))
-				{
+			if (IsBowDrawNoZoomCheck(player, playerCamera)) {
+				if (!HasSpell(player, settings->BowStaminaSpell)) {
 					player->AddSpell(settings->BowStaminaSpell);
 				}
 			}
-			else
-			{
-				if (HasSpell(player, settings->BowStaminaSpell))
-				{
-					player->RemoveSpell(settings->BowStaminaSpell);
-				}
+			else if (HasSpell(player, settings->BowStaminaSpell)) {
+				player->RemoveSpell(settings->BowStaminaSpell);
 			}
 
-			if (IsAttacking(player))
-			{
-				if (!HasSpell(player, settings->IsAttackingSpell))
-				{
+			if (IsXbowDrawCheck(player, playerCamera)) {
+				if (!HasSpell(player, settings->XbowStaminaSpell)) {
+					player->AddSpell(settings->XbowStaminaSpell);
+				}
+			} else if (HasSpell(player, settings->XbowStaminaSpell)) {
+				player->RemoveSpell(settings->XbowStaminaSpell);
+			}
+
+			if (IsAttacking(player)) {
+				if (!HasSpell(player, settings->IsAttackingSpell)) {
 					player->AddSpell(settings->IsAttackingSpell);
 				}
 			}
-			else
-			{
+			else {
 				if (HasSpell(player, settings->IsAttackingSpell))
 				{
 					player->RemoveSpell(settings->IsAttackingSpell);
 				}
 
-				if (IsBlocking(player))
-				{
+				if (IsBlocking(player)) {
+					auto leftHand = player->GetEquippedObject(true);
+					//Parry setup
+					if ((!leftHand || leftHand->IsWeapon()) && !settings->IsBlockingWeaponSpellCasted) {
+						settings->IsBlockingWeaponSpellCasted = true;
+						Conditions::ApplySpell(player, player, settings->MAGParryControllerSpell);
+					}
+
 					if (!HasSpell(player, settings->IsBlockingSpell))
 					{
 						player->AddSpell(settings->IsBlockingSpell);
@@ -106,22 +110,19 @@ private:
 				}
 				else
 				{
-					if (HasSpell(player, settings->IsBlockingSpell))
-					{
+					if (HasSpell(player, settings->IsBlockingSpell)) {
 						player->RemoveSpell(settings->IsBlockingSpell);
 					}
+					settings->IsBlockingWeaponSpellCasted = false;
 				}
 			}
 
 			if (player->IsSneaking() && IsMoving(player))
 			{
-
-				if(!HasSpell(player, settings->IsSneakingSpell))
+				if(!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
 					player->AddSpell(settings->IsSneakingSpell);
 			}
-			else
-			{
-				if(HasSpell(player, settings->IsSneakingSpell))
+			else if(HasSpell(player, settings->IsSneakingSpell)) {
 					player->RemoveSpell(settings->IsSneakingSpell);
 			}
 		}
@@ -136,7 +137,6 @@ private:
 		auto scale = _GetScaleFunction(a1);
 		if(skyrim_cast<RE::Actor*>(a1) == RE::PlayerCharacter::GetSingleton())
 		{
-			
 			return a1->GetReferenceRuntimeData().refScale / 100.0f;
 		}
 		else
@@ -147,6 +147,35 @@ private:
 
 	inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
 
+	static bool IsXbowDrawCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
+	{
+		auto attackState = player->AsActorState()->GetAttackState();
+
+		if (playerCamera->bowZoomedIn) {
+			return false;
+		}
+
+		auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+		if (!equippedWeapon) {
+			return false;
+		}
+
+		switch (attackState) {
+			case RE::ATTACK_STATE_ENUM::kBowDrawn:
+			{
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow) {
+					return true;
+				}
+				break;
+			}
+			default:
+			{
+				break;
+			}
+		}
+		return false;
+	}
+
 	static bool IsBowDrawNoZoomCheck(RE::PlayerCharacter* player, RE::PlayerCamera* playerCamera)
 	{
 		auto attackState = player->AsActorState()->GetAttackState();
@@ -156,34 +185,26 @@ private:
 			return false;
 		}
 
-		switch (attackState)
-		{
-			case RE::ATTACK_STATE_ENUM::kBowDrawn:
-			{
-				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+		auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+		if (!equippedWeapon) {
+			return false;
+		}
 
-				if (!equippedWeapon)
-				{			
-					break;
-				}
-
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow || equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow)
-				{
+		switch (attackState) {
+			case RE::ATTACK_STATE_ENUM::kBowDrawn:{
+				
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow){
 					return true;
 				}
 				break;
 			}
-			case RE::ATTACK_STATE_ENUM::kBowAttached:
-			{
-				auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(player->GetEquippedObject(false));
+			case RE::ATTACK_STATE_ENUM::kBowAttached:{
 
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow)
-				{
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow) {
 					return true;
 				}
 				break;
 			}
-		
 			default:
 			{
 				break;
