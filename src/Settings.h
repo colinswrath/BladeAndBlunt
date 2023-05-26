@@ -42,6 +42,7 @@ public:
 	RE::TESGlobal* InjuryChance25Health;
 
 	RE::TESGlobal* MAG_levelBasedDifficulty;
+	RE::TESGlobal* MAG_InjuryAndRest;
 
 	RE::EffectSetting* MAG_ParryWindowEffect;
 	RE::EffectSetting* MAG_InjuryCooldown1;
@@ -52,7 +53,7 @@ public:
 	bool enableInjuries;
 	bool enableSneakStaminaCost;
 	bool enableLevelDifficulty;
-	bool zeroAllWeapStamina;
+	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
 
 	bool IsBlockingWeaponSpellCasted = false;

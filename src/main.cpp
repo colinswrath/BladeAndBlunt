@@ -68,9 +68,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface * 
 
 void InitListener(SKSE::MessagingInterface::Message* a_msg)
 {
+	auto settings = Settings::GetSingleton();
 	switch (a_msg->type)
 	{
 	case SKSE::MessagingInterface::kNewGame:
+	case SKSE::MessagingInterface::kPostLoadGame:
 		Settings::GetSingleton()->LoadForms();
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
@@ -82,7 +84,6 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
-		auto settings = Settings::GetSingleton();
 		if (settings) {
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();

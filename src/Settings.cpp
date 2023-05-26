@@ -17,7 +17,7 @@ void Settings::LoadSettings()
 	enableInjuries = ini.GetBoolValue("", "bEnableInjuries", true);
 	enableSneakStaminaCost = ini.GetBoolValue("", "bEnableSneakStaminaCost", true);
 	enableLevelDifficulty = ini.GetBoolValue("", "bLevelBasedDifficulty", true);
-	zeroAllWeapStamina = ini.GetBoolValue("", "bZeroAllWeaponStamina", true);
+	zeroAllWeapStagger = ini.GetBoolValue("", "bZeroAllWeaponStagger", true);
 	armorScalingEnabled = ini.GetBoolValue("", "bArmorRatingScalingEnabled", true);
 
 	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
@@ -93,7 +93,7 @@ RE::FormID Settings::ParseFormID(const std::string& str)
 
 void Settings::AdjustWeaponStaggerVals() 
 {
-	if (zeroAllWeapStamina) {
+	if (zeroAllWeapStagger) {
 		logger::info("Adjusting weapon stagger values");
 		int16_t totalWeaps = 0;
 
@@ -151,23 +151,24 @@ void Settings::LoadForms()
 	if (InjurySpell3FormId)
 		InjurySpell3 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell3FormId, FileName));
 
+
+	//Hardcoded loads
 	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
 	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
-	
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
 	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
-
 	InjuryChance25Health = dataHandler->LookupForm(ParseFormID("0x852"), FileName)->As<RE::TESGlobal>();
 	InjuryChance50Health = dataHandler->LookupForm(ParseFormID("0x853"), FileName)->As<RE::TESGlobal>();
-
 	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
 	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
-
 	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
+	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
+
 	MAG_levelBasedDifficulty->value = enableLevelDifficulty;
+	MAG_InjuryAndRest->value = enableInjuries;
 
 	auto isPowerAttacking = new RE::TESConditionItem;
 	isPowerAttacking->data.comparisonValue.f = 1.0f;
