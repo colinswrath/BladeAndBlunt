@@ -65,9 +65,9 @@ namespace BashBlockStaminaPatch
 				return 0.0F;
 			}
 
-			auto* equippedWeapon = actor->GetEquippedObject(a_attackData->IsLeftAttack());
-
-			auto equippedWeaponWeight = equippedWeapon ? equippedWeapon->As<RE::TESObjectWEAP>()->weight : 1.0F;
+			auto* equippedObj = actor->GetEquippedObject(a_attackData->IsLeftAttack());
+			auto equippedWeapon = equippedObj ? equippedObj->As<RE::TESObjectWEAP>() : nullptr;
+			auto equippedWeaponWeight = equippedWeapon ? equippedWeapon->weight : 1.0F;
 
 			if (!equippedWeapon) {
 				equippedWeapon = Conditions::GetUnarmedWeapon();
