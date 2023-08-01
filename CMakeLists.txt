@@ -100,6 +100,8 @@ set(SOURCES
 	src/Events.h
 	src/BashBlockStaminaPatch.h
 	src/ArmorRatingScaling.h
+	src/Serialization.h
+	src/InjuryPenaltyManager.h
 )
 
 source_group(

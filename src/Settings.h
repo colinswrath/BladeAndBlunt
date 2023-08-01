@@ -1,3 +1,5 @@
+#pragma once
+
 class Settings
 {
 public:
@@ -40,9 +42,11 @@ public:
 
 	RE::TESGlobal* InjuryChance50Health;
 	RE::TESGlobal* InjuryChance25Health;
+	RE::TESGlobal* Survival_ModeEnabled;
 
 	RE::TESGlobal* MAG_levelBasedDifficulty;
 	RE::TESGlobal* MAG_InjuryAndRest;
+	RE::TESGlobal* HealthPenaltyUIGlobal;
 
 	RE::EffectSetting* MAG_ParryWindowEffect;
 	RE::EffectSetting* MAG_InjuryCooldown1;
@@ -55,6 +59,12 @@ public:
 	bool enableLevelDifficulty;
 	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
+	bool starfrostInstalled;
+	
+	float injury1AVPercent;
+	float injury2AVPercent;
+	float injury3AVPercent;
+	float injuryUpdateFrequency = 0.5f;
 
 	bool IsBlockingWeaponSpellCasted = false;
 

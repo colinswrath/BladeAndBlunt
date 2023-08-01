@@ -1,9 +1,13 @@
 #pragma once
 
 #include "Conditions.h"
+#include "InjuryPenaltyManager.h"
 #include "Hooks.h"
 
+static float lastTime;
+
 using namespace Conditions;
+
 class UpdateManager
 {
 public:
@@ -59,12 +63,12 @@ public:
 
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
-	{
+	{	
+		auto settings = Settings::GetSingleton();
 		if (UpdateManager::frameCount > 6)
 		{
 			UpdateManager::frameCount = 0;
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
-			auto settings = Settings::GetSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
 			if (IsBowDrawNoZoomCheck(player, playerCamera)) {
@@ -116,7 +120,6 @@ private:
 					settings->IsBlockingWeaponSpellCasted = false;
 				}
 			}
-
 			if (player->IsSneaking() && IsMoving(player))
 			{
 				if(!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
@@ -126,6 +129,19 @@ private:
 					player->RemoveSpell(settings->IsSneakingSpell);
 			}
 		}
+
+		//Updates for AV
+		if (!RE::UI::GetSingleton()->GameIsPaused()) {
+			if (Cache::g_deltaTime > 0) {
+				lastTime += Cache::g_deltaTime;
+				if (lastTime >= settings->injuryUpdateFrequency) {
+					auto inj = InjuryPenaltyHandler::GetSingleton();
+					inj->CheckInjuryAvPenalty();
+					lastTime = 0;
+				}
+			}
+		}
+
 		UpdateManager::frameCount++;
 		return _OnFrameFunction(a1);
 	}
