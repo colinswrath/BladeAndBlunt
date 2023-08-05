@@ -33,7 +33,9 @@ void Settings::LoadSettings()
 	std::string injurySpell2FormID((ini.GetValue("", "InjurySpell2FormID", "")));
 	std::string injurySpell3FormID((ini.GetValue("", "InjurySpell3FormID", "")));
 
-	
+	injury1AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury1AVPercent", 0.10));
+	injury2AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury2AVPercent", 0.25));
+	injury3AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury3AVPercent", 0.50));
 
 	std::string fileName(ini.GetValue("", "sModFileName", ""));
 
@@ -151,21 +153,32 @@ void Settings::LoadForms()
 	if (InjurySpell3FormId)
 		InjurySpell3 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell3FormId, FileName));
 
-
 	//Hardcoded loads
 	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
 	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
 	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
-	InjuryChance25Health = dataHandler->LookupForm(ParseFormID("0x852"), FileName)->As<RE::TESGlobal>();
-	InjuryChance50Health = dataHandler->LookupForm(ParseFormID("0x853"), FileName)->As<RE::TESGlobal>();
+	InjuryChance25Health = dataHandler->LookupForm(ParseFormID("0xADA180"), "Update.esm")->As<RE::TESGlobal>();
+	InjuryChance50Health = dataHandler->LookupForm(ParseFormID("0xADA181"), "Update.esm")->As<RE::TESGlobal>();
 	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
 	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
 	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
 	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
+	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+
+	auto smGlobal = dataHandler->LookupForm(RE::FormID(0x826), "ccqdrsse001-survivalmode.esl");
+
+	if (smGlobal) {
+		Survival_ModeEnabled = smGlobal->As<RE::TESGlobal>();
+	}
+
+	if (dataHandler->LookupModByName("Starfrost.esp"))
+	{
+		starfrostInstalled = true;
+	}	
 
 	MAG_levelBasedDifficulty->value = enableLevelDifficulty;
 	MAG_InjuryAndRest->value = enableInjuries;

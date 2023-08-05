@@ -1,6 +1,7 @@
 #include "Hooks.h"
 #include "Cache.h"
 #include "Events.h"
+#include "Serialization.h"
 
 void InitLogger()
 {
@@ -114,6 +115,13 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	if (!messaging->RegisterListener(InitListener))
 	{
 		return false;
+	}
+
+	if (auto serialization = SKSE::GetSerializationInterface()) {
+		serialization->SetUniqueID(Serialization::ID);
+		serialization->SetSaveCallback(&Serialization::SaveCallback);
+		serialization->SetLoadCallback(&Serialization::LoadCallback);
+		serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 
 	logger::info("Blade and Blunt loaded.");
