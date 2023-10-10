@@ -74,7 +74,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 	{
 	case SKSE::MessagingInterface::kNewGame:
 	case SKSE::MessagingInterface::kPostLoadGame:
-		Settings::GetSingleton()->LoadForms();
+		Settings::GetSingleton()->SetGlobalsAndGameSettings();
 		break;
 	case SKSE::MessagingInterface::kPostLoad:
 		if (!Hooks::InstallBashMultHook()) {
@@ -102,6 +102,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("Loading Blade and Blunt.");
 	SKSE::AllocTrampoline(320);
 	Cache::CacheAddLibAddresses();
+	Settings::GetSingleton()->LoadSettings();
 	if (!Hooks::InstallHooks())
 	{
 		logger::error("Hook installation failed.");
@@ -109,7 +110,6 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	}
 
 	OnHitEventHandler::Register();
-	Settings::GetSingleton()->LoadSettings();
 
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener(InitListener))

@@ -17,7 +17,8 @@ public:
 	void CheckInjuryAvPenalty()
 	{
 		auto settings = Settings::GetSingleton();
-		if (settings->starfrostInstalled && Conditions::IsSurvivalEnabled()) {
+		if ((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
+			(settings->SMOnlyEnableInjuries && settings->enableInjuries && Conditions::IsSurvivalEnabled())) {
 			auto player = Cache::GetPlayerSingleton();
 
 			if (player->HasSpell(settings->InjurySpell1)) {
@@ -67,7 +68,6 @@ public:
 		float currentPenaltyMag = currentInjuryPenalty;
 
 		if (currentPenaltyMag > 0) {
-			logger::info("Remove AV Pen");
 			currentInjuryPenalty = 0.0f;
 			SetAttributePenaltyUIGlobal(0.0f);
 			player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyMag);
@@ -78,8 +78,10 @@ public:
 	{
 		auto newVal = penaltyPerc * 100.0f;
 		newVal = std::clamp(newVal, 0.0f, 100.0f);
-
-		Settings::GetSingleton()->HealthPenaltyUIGlobal->value = newVal;
+		auto settings = Settings::GetSingleton();
+		if (settings->HealthPenaltyUIGlobal) {
+			settings->HealthPenaltyUIGlobal->value = newVal;
+		}
 	}
 
 	float GetMaxHealthAv()

@@ -8,6 +8,7 @@ public:
 	void LoadSettings();
 	void LoadForms();
 	void AdjustWeaponStaggerVals();
+	void SetGlobalsAndGameSettings();
 
 	RE::FormID IsAttackingSpellFormId;
 	RE::FormID IsBlockingSpellFormId;
@@ -43,6 +44,7 @@ public:
 	RE::TESGlobal* InjuryChance50Health;
 	RE::TESGlobal* InjuryChance25Health;
 	RE::TESGlobal* Survival_ModeEnabled;
+	RE::TESGlobal* MAG_InjuriesSMOnly;
 
 	RE::TESGlobal* MAG_levelBasedDifficulty;
 	RE::TESGlobal* MAG_InjuryAndRest;
@@ -55,6 +57,7 @@ public:
 	RE::TESCondition* IsPowerAttacking;
 
 	bool enableInjuries;
+	bool SMOnlyEnableInjuries;
 	bool enableSneakStaminaCost;
 	bool enableLevelDifficulty;
 	bool zeroAllWeapStagger;

@@ -34,7 +34,7 @@ public:
 
 		if (causeActor && targetActor && targetActor->IsPlayerRef()) {
 			const auto applicationRuntime = RE::GetDurationOfApplicationRunTime();
-
+			auto settings = Settings::GetSingleton();
 			bool skipEvent = false;
 			size_t numToRemove = 0;
 			for (const auto& recentHit : recentHits) {
@@ -54,7 +54,7 @@ public:
 
 			if (!skipEvent) {			
 				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
-
+				
 				//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
 				//We can work around it like this
 				bool powerAttackMelee = false;
@@ -77,7 +77,9 @@ public:
 					}
 				}
 
-				if (Settings::GetSingleton()->enableInjuries) {
+				if (((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
+					(settings->enableInjuries && settings->SMOnlyEnableInjuries && Conditions::IsSurvivalEnabled())) 
+					&& attackingWeapon) {
 					RollForInjuryEvent();
 				}
 
@@ -133,19 +135,21 @@ public:
 		auto health = Conditions::GetMaxHealth();
 		auto settings = Settings::GetSingleton();
 
-		//If health below 25% roll for injury
-		if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
-			auto random = std::rand() % 100;
+		if (settings->enableInjuries) {
+			//If health below 25% roll for injury
+			if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
+				auto random = std::rand() % 100;
 
-			if (random < settings->InjuryChance25Health->value) {
-				ApplyInjury();
-			}
-		} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
-			//Roll rand for injury
-			auto random = std::rand() % 100;
+				if (random < settings->InjuryChance25Health->value) {
+					ApplyInjury();
+				}
+			} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
+				//Roll rand for injury
+				auto random = std::rand() % 100;
 
-			if (random < settings->InjuryChance50Health->value) {
-				ApplyInjury();
+				if (random < settings->InjuryChance50Health->value) {
+					ApplyInjury();
+				}
 			}
 		}
 	}
