@@ -16,11 +16,13 @@ namespace Hooks
 
 		auto runtime = REL::Module::GetRuntime();
 		if (Settings::GetSingleton()->armorScalingEnabled) {
+			logger::info("Installing ar hook");
 			if (runtime == REL::Module::Runtime::AE) {
 				ArmorRatingScaling::InstallArmorRatingHookAE();
 			} else {
 				ArmorRatingScaling::InstallArmorRatingHookSE();	
 			}
+			logger::info("Installed ar hook");
 		}
 
 		if (!BashBlockStaminaPatch::InstallBlockMultHook()) {

@@ -15,6 +15,7 @@ void Settings::LoadSettings()
 	ini.LoadFile(R"(.\Data\SKSE\Plugins\BladeAndBlunt.ini)");
 
 	enableInjuries = ini.GetBoolValue("", "bEnableInjuries", true);
+	SMOnlyEnableInjuries = ini.GetBoolValue("", "bEnableInjuriesOnlyWithSM", false);
 	enableSneakStaminaCost = ini.GetBoolValue("", "bEnableSneakStaminaCost", true);
 	enableLevelDifficulty = ini.GetBoolValue("", "bLevelBasedDifficulty", true);
 	zeroAllWeapStagger = ini.GetBoolValue("", "bZeroAllWeaponStagger", true);
@@ -164,6 +165,7 @@ void Settings::LoadForms()
 	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
 	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
 	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
+	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
 	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
@@ -180,8 +182,7 @@ void Settings::LoadForms()
 		starfrostInstalled = true;
 	}	
 
-	MAG_levelBasedDifficulty->value = enableLevelDifficulty;
-	MAG_InjuryAndRest->value = enableInjuries;
+	SetGlobalsAndGameSettings();
 
 	auto isPowerAttacking = new RE::TESConditionItem;
 	isPowerAttacking->data.comparisonValue.f = 1.0f;
@@ -194,3 +195,23 @@ void Settings::LoadForms()
 	logger::info("Forms loaded");
 
 }
+
+void Settings::SetGlobalsAndGameSettings() 
+{
+	MAG_levelBasedDifficulty->value = enableLevelDifficulty;
+	MAG_InjuryAndRest->value = enableInjuries;
+	MAG_InjuriesSMOnly->value = SMOnlyEnableInjuries;
+
+	//Set fMaxArmorRating game setting
+	auto gameSettings = RE::GameSettingCollection::GetSingleton();
+	auto maxRatingSetting = gameSettings->GetSetting("fMaxArmorRating");
+
+	if (armorScalingEnabled) {
+		logger::info("Setting max armor rating to 90");
+		maxRatingSetting->data.f = 90.0f;
+	} else {
+		logger::info("Setting max armor rating to 75");
+		maxRatingSetting->data.f = 75.0f;
+	}
+}
+
