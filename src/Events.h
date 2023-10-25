@@ -4,18 +4,20 @@
 //Credit: PAPER by Dennis Soemers used as reference
 struct RecentHitEventData
 {
-	RecentHitEventData(RE::TESObjectREFR* target, RE::TESObjectREFR* cause, float applicationRuntime) :
+	RecentHitEventData(RE::TESObjectREFR* target, RE::TESObjectREFR* cause, std::uint32_t applicationRuntime) :
 		target(target), cause(cause), applicationRuntime(applicationRuntime) {}
 
 	RE::TESObjectREFR* target;
 	RE::TESObjectREFR* cause;
-	float applicationRuntime;
+	std::uint32_t applicationRuntime;
+
 };
 
 class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
 {
 public:
-	std::vector<RecentHitEventData> recentHits;
+	std::multimap<std::uint32_t, RecentHitEventData> recentGeneralHits;
+	std::multimap<std::uint32_t, RecentHitEventData> recentInjuryRolls;
 
 	static OnHitEventHandler* GetSingleton()
 	{
@@ -23,38 +25,32 @@ public:
 		return &singleton;
 	}
 
+	//TODO-Temp fix until I can upgrade clib versions
+	std::uint32_t GetDurationOfApplicationRunTime()
+	{
+		REL::Relocation<std::uint32_t*> runtime{ RELOCATION_ID(523662, 410201) };
+		return *runtime;
+	}
+
 	RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 	{
 		if (!a_event || !a_event->target || !a_event->cause) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		
+
 		auto causeActor = a_event->cause->As<RE::Actor>();
 		auto targetActor = a_event->target->As<RE::Actor>();
-
-		if (causeActor && targetActor && targetActor->IsPlayerRef()) {
-			const auto applicationRuntime = RE::GetDurationOfApplicationRunTime();
+	
+		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto settings = Settings::GetSingleton();
-			bool skipEvent = false;
-			size_t numToRemove = 0;
-			for (const auto& recentHit : recentHits) {
-				if (recentHit.applicationRuntime == applicationRuntime) {
-					if (recentHit.cause == a_event->cause.get() && recentHit.target == targetActor) {
-						skipEvent = true;
-						break;
-					}
-				} else {
-					++numToRemove;
-				}
-			}
+			auto applicationRuntime = GetDurationOfApplicationRunTime();
 
-			if (numToRemove > 0) {
-				recentHits.erase(recentHits.begin(), recentHits.begin() + numToRemove);
-			}
+			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);
 
 			if (!skipEvent) {			
 				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
-				
+				auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
+
 				//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
 				//We can work around it like this
 				bool powerAttackMelee = false;
@@ -77,35 +73,38 @@ public:
 					}
 				}
 
+				bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
+
 				if (((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
 					(settings->enableInjuries && settings->SMOnlyEnableInjuries && Conditions::IsSurvivalEnabled())) 
-					&& attackingWeapon) {
-					RollForInjuryEvent();
+					&& ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0))) {
+
+					uint32_t roundedRunTime = RoundRunTime(applicationRuntime);
+					if (!ShouldSkipInjuryRoll(causeActor, targetActor, roundedRunTime)) {
+						RollForInjuryEvent(isBlocking ? 0.50f : 1.0f);
+						recentInjuryRolls.insert(std::make_pair(roundedRunTime, RecentHitEventData(targetActor, causeActor, roundedRunTime)));
+					}
 				}
 
-				auto leftHand = RE::PlayerCharacter::GetSingleton()->GetEquippedObject(true);
+				auto leftHand = targetActor->GetEquippedObject(true);
 
 				bool blockedMeleeHit = false;
 				if (!a_event->projectile && 
 					((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
-					(a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking())) {
+					isBlocking) {
 					blockedMeleeHit = true;
 				}
 				
 				//Shield Stagger
-				if (leftHand && leftHand->IsArmor() && blockedMeleeHit)
-				{
+				if (leftHand && leftHand->IsArmor() && blockedMeleeHit){
 					ProcessHitEventForBlockStagger(targetActor, causeActor);
 				} else if (blockedMeleeHit) {
 					//Parry
 					ProcessHitEventForParry(targetActor,causeActor);
 				}
-
-				recentHits.emplace_back(targetActor, causeActor, applicationRuntime);
+				recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 			}
-
 		}
-
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
@@ -128,30 +127,79 @@ public:
 		}
 	}
 
-	static void RollForInjuryEvent() 
+	bool ShouldSkipHitEvent(RE::Actor* causeActor, RE::Actor* targetActor, std::uint32_t runTime)
 	{
+		bool skipEvent = false;
+		
+		auto matchedHits = recentGeneralHits.equal_range(runTime);
+		for (auto it = matchedHits.first; it != matchedHits.second; ++it) {
+			if (it->second.cause == causeActor && it->second.target == targetActor) {
+				skipEvent = true;
+				break;
+			}
+		}
 
+		auto upper = recentGeneralHits.lower_bound(runTime);
+		auto it = recentGeneralHits.begin();
+		while (it != upper) {
+			it = recentGeneralHits.erase(it);
+		}
+
+		return skipEvent;
+	}
+
+	uint32_t RoundRunTime(uint32_t runTime)
+	{
+		auto flooredTime = static_cast<uint32_t>((runTime * 0.01f)+0.5f);
+		return flooredTime * 100; 
+	}
+
+	//this is separate from the "ShouldSkipHitEvent" because this is meant to track injury roll hits within the last second.
+	//"ShouldSkipHitEvent" tracks duplicate events that happen at the same time (ie. hits from enchanted weapons trigger multiple hits)
+	bool ShouldSkipInjuryRoll(RE::Actor* causeActor, RE::Actor* targetActor, std::uint32_t runTime)
+	{
+		bool skipEvent = false;
+
+		auto secondRuntime = recentInjuryRolls.lower_bound(runTime-1000);
+		//Loop over all hits within the last 1 second of runtime
+		for (auto it = secondRuntime; it != recentInjuryRolls.end(); ++it) {
+			if (it->second.cause == causeActor && it->second.target == targetActor) {
+				skipEvent = true;
+				break;
+			}
+		}
+
+		//Remove all events older than 1 second from runtime
+		auto it = recentInjuryRolls.begin();
+		while (it != secondRuntime) {
+			it = recentInjuryRolls.erase(it);
+		}
+
+		return skipEvent;
+	}
+
+	static void RollForInjuryEvent(float chanceMult = 1.0f) 
+	{
 		auto player = RE::PlayerCharacter::GetSingleton();
 		auto health = Conditions::GetMaxHealth();
 		auto settings = Settings::GetSingleton();
 
-		if (settings->enableInjuries) {
-			//If health below 25% roll for injury
-			if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
-				auto random = std::rand() % 100;
+		//If health below 25% roll for injury
+		if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
+			auto random = std::rand() % 100;
 
-				if (random < settings->InjuryChance25Health->value) {
-					ApplyInjury();
-				}
-			} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
-				//Roll rand for injury
-				auto random = std::rand() % 100;
+			if (random < settings->InjuryChance25Health->value * chanceMult) {
+				ApplyInjury();
+			}
+		} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
+			//Roll rand for injury
+			auto random = std::rand() % 100;
 
-				if (random < settings->InjuryChance50Health->value) {
-					ApplyInjury();
-				}
+			if (random < settings->InjuryChance50Health->value * chanceMult) {
+				ApplyInjury();
 			}
 		}
+
 	}
 
 	static void ApplyInjury()
