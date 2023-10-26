@@ -98,10 +98,14 @@ set(SOURCES
 	src/Conditions.h
 	src/Cache.h
 	src/Events.h
-	src/BashBlockStaminaPatch.h
-	src/ArmorRatingScaling.h
+	src/patches/BashBlockStaminaPatch.h
+	src/patches/ArmorRatingScaling.h
 	src/Serialization.h
 	src/InjuryPenaltyManager.h
+	src/InjuryApplicationManager.h
+	src/RecentHitEventData.h
+	src/patches/MiscPatches.h
+	src/patches/MiscPatches.cpp
 )
 
 source_group(
