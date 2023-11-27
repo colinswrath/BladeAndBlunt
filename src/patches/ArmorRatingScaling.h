@@ -124,11 +124,11 @@ namespace ArmorRatingScaling
 		};
 
 		ratingPatch code1{ Hooks::armorRating1.address() + 0x115 };
-		ratingPatch2 code2{ Hooks::armorRating2.address() + 0x7C };
+		ratingPatch2 code2{ Hooks::armorRating2.address() + 0x99 };
 
 		auto& trampoline = SKSE::GetTrampoline();
 		trampoline.write_branch<6>(Hooks::armorRating1.address() + 0x101, trampoline.allocate(code1));
-		trampoline.write_branch<6>(Hooks::armorRating2.address() + 0x99, trampoline.allocate(code2));
+		trampoline.write_branch<6>(Hooks::armorRating2.address() + 0x7C, trampoline.allocate(code2));
 		logger::info("armor rating SE hook installed");
 		return true;
 	}

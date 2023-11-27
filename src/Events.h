@@ -33,7 +33,7 @@ public:
 		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto applicationRuntime = GetDurationOfApplicationRunTime();
 
-			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);
+			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);	//Filters out dupe events
 
 			if (!skipEvent) {			
 				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
