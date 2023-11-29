@@ -1,21 +1,12 @@
 #pragma once
 #include <Conditions.h>
-
-//Credit: PAPER by Dennis Soemers used as reference
-struct RecentHitEventData
-{
-	RecentHitEventData(RE::TESObjectREFR* target, RE::TESObjectREFR* cause, float applicationRuntime) :
-		target(target), cause(cause), applicationRuntime(applicationRuntime) {}
-
-	RE::TESObjectREFR* target;
-	RE::TESObjectREFR* cause;
-	float applicationRuntime;
-};
+#include <InjuryApplicationManager.h>
+#include <RecentHitEventData.h>
 
 class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
 {
 public:
-	std::vector<RecentHitEventData> recentHits;
+	std::multimap<std::uint32_t, RecentHitEventData> recentGeneralHits;
 
 	static OnHitEventHandler* GetSingleton()
 	{
@@ -23,38 +14,31 @@ public:
 		return &singleton;
 	}
 
+	//TODO-Temp fix until I can upgrade clib versions
+	std::uint32_t GetDurationOfApplicationRunTime()
+	{
+		REL::Relocation<std::uint32_t*> runtime{ RELOCATION_ID(523662, 410201) };
+		return *runtime;
+	}
+
 	RE::BSEventNotifyControl ProcessEvent(const RE::TESHitEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESHitEvent>* a_eventSource) override
 	{
 		if (!a_event || !a_event->target || !a_event->cause) {
 			return RE::BSEventNotifyControl::kContinue;
 		}
-		
+
 		auto causeActor = a_event->cause->As<RE::Actor>();
 		auto targetActor = a_event->target->As<RE::Actor>();
+	
+		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
+			auto applicationRuntime = GetDurationOfApplicationRunTime();
 
-		if (causeActor && targetActor && targetActor->IsPlayerRef()) {
-			const auto applicationRuntime = RE::GetDurationOfApplicationRunTime();
-			auto settings = Settings::GetSingleton();
-			bool skipEvent = false;
-			size_t numToRemove = 0;
-			for (const auto& recentHit : recentHits) {
-				if (recentHit.applicationRuntime == applicationRuntime) {
-					if (recentHit.cause == a_event->cause.get() && recentHit.target == targetActor) {
-						skipEvent = true;
-						break;
-					}
-				} else {
-					++numToRemove;
-				}
-			}
-
-			if (numToRemove > 0) {
-				recentHits.erase(recentHits.begin(), recentHits.begin() + numToRemove);
-			}
+			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);	//Filters out dupe events
 
 			if (!skipEvent) {			
 				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
-				
+				auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
+
 				//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
 				//We can work around it like this
 				bool powerAttackMelee = false;
@@ -77,35 +61,33 @@ public:
 					}
 				}
 
-				if (((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
-					(settings->enableInjuries && settings->SMOnlyEnableInjuries && Conditions::IsSurvivalEnabled())) 
-					&& attackingWeapon) {
-					RollForInjuryEvent();
+				bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
+
+				if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
+
+					auto injuryManager = InjuryApplicationManager::GetSingleton();
+					injuryManager->ProcessHitInjuryApplication(causeActor,targetActor,applicationRuntime,isBlocking);
 				}
 
-				auto leftHand = RE::PlayerCharacter::GetSingleton()->GetEquippedObject(true);
+				auto leftHand = targetActor->GetEquippedObject(true);
 
 				bool blockedMeleeHit = false;
 				if (!a_event->projectile && 
 					((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
-					(a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking())) {
+					isBlocking) {
 					blockedMeleeHit = true;
 				}
 				
 				//Shield Stagger
-				if (leftHand && leftHand->IsArmor() && blockedMeleeHit)
-				{
+				if (leftHand && leftHand->IsArmor() && blockedMeleeHit){
 					ProcessHitEventForBlockStagger(targetActor, causeActor);
 				} else if (blockedMeleeHit) {
 					//Parry
 					ProcessHitEventForParry(targetActor,causeActor);
 				}
-
-				recentHits.emplace_back(targetActor, causeActor, applicationRuntime);
+				recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 			}
-
 		}
-
 		return RE::BSEventNotifyControl::kContinue;
 	}
 
@@ -128,50 +110,25 @@ public:
 		}
 	}
 
-	static void RollForInjuryEvent() 
+	bool ShouldSkipHitEvent(RE::Actor* causeActor, RE::Actor* targetActor, std::uint32_t runTime)
 	{
-
-		auto player = RE::PlayerCharacter::GetSingleton();
-		auto health = Conditions::GetMaxHealth();
-		auto settings = Settings::GetSingleton();
-
-		if (settings->enableInjuries) {
-			//If health below 25% roll for injury
-			if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
-				auto random = std::rand() % 100;
-
-				if (random < settings->InjuryChance25Health->value) {
-					ApplyInjury();
-				}
-			} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
-				//Roll rand for injury
-				auto random = std::rand() % 100;
-
-				if (random < settings->InjuryChance50Health->value) {
-					ApplyInjury();
-				}
+		bool skipEvent = false;
+		
+		auto matchedHits = recentGeneralHits.equal_range(runTime);
+		for (auto it = matchedHits.first; it != matchedHits.second; ++it) {
+			if (it->second.cause == causeActor && it->second.target == targetActor) {
+				skipEvent = true;
+				break;
 			}
 		}
-	}
 
-	static void ApplyInjury()
-	{
-		auto player = RE::PlayerCharacter::GetSingleton();
-		auto settings = Settings::GetSingleton();
-
-		if (player->HasSpell(settings->InjurySpell1)) {
-			if (!Conditions::PlayerHasActiveMagicEffect(settings->MAG_InjuryCooldown1)) {
-				player->RemoveSpell(settings->InjurySpell1);
-				player->AddSpell(settings->InjurySpell2);
-			}
-		} else if (player->HasSpell(settings->InjurySpell2)) {
-			if (!Conditions::PlayerHasActiveMagicEffect(settings->MAG_InjuryCooldown2)) {
-				player->RemoveSpell(settings->InjurySpell2);
-				player->AddSpell(settings->InjurySpell3);
-			}
-		} else if (!player->HasSpell(settings->InjurySpell3)) {
-			player->AddSpell(settings->InjurySpell1);
+		auto upper = recentGeneralHits.lower_bound(runTime);
+		auto it = recentGeneralHits.begin();
+		while (it != upper) {
+			it = recentGeneralHits.erase(it);
 		}
+
+		return skipEvent;
 	}
 
 	static void Register()
