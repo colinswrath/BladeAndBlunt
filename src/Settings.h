@@ -8,11 +8,13 @@ public:
 	void LoadSettings();
 	void LoadForms();
 	void AdjustWeaponStaggerVals();
+	void ReplacePowerAttackKeywords();
 	void SetGlobalsAndGameSettings();
 
 	RE::FormID IsAttackingSpellFormId;
 	RE::FormID IsBlockingSpellFormId;
 	RE::FormID IsSneakingSpellFormId;
+	RE::FormID IsCastingSpellFormId;
 	RE::FormID BowDrainStaminaFormId;
 	RE::FormID XbowDrainStaminaFormId;
 	RE::FormID BashPerkFormId;
@@ -21,12 +23,14 @@ public:
 	RE::FormID InjurySpell1FormId;
 	RE::FormID InjurySpell2FormId;
 	RE::FormID InjurySpell3FormId;
+	RE::FormID DualWieldReplaceFormId;
 
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
 	RE::SpellItem* BowStaminaSpell;
 	RE::SpellItem* XbowStaminaSpell;
+	RE::SpellItem* IsCastingSpell;
 	RE::SpellItem* MAGParryStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
@@ -49,10 +53,13 @@ public:
 	RE::TESGlobal* MAG_levelBasedDifficulty;
 	RE::TESGlobal* MAG_InjuryAndRest;
 	RE::TESGlobal* HealthPenaltyUIGlobal;
+	RE::TESGlobal* MAG_PowerAttackReplacement;
 
 	RE::EffectSetting* MAG_ParryWindowEffect;
 	RE::EffectSetting* MAG_InjuryCooldown1;
 	RE::EffectSetting* MAG_InjuryCooldown2;
+
+	RE::BGSKeyword* DualWieldReplaceKeyword;
 
 	RE::TESCondition* IsPowerAttacking;
 
@@ -60,6 +67,7 @@ public:
 	bool SMOnlyEnableInjuries;
 	bool enableSneakStaminaCost;
 	bool enableLevelDifficulty;
+	bool replaceAttackTypeKeywords;
 	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
 	bool starfrostInstalled;

@@ -15,7 +15,7 @@ float MiscPatches::GetScale(RE::TESObjectREFR* a1)
 {
 	auto scale = _GetScaleFunction(a1);
 	if (skyrim_cast<RE::Actor*>(a1) == RE::PlayerCharacter::GetSingleton()) {
-		return a1->GetReferenceRuntimeData().refScale / 100.0f;
+		return 1.0f;
 	} else {
 		return scale;
 	}

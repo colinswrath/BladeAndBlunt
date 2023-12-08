@@ -32,6 +32,14 @@ private:
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
+			if (player->IsCasting(nullptr)) {
+				if (settings->IsCastingSpell && !HasSpell(player, settings->IsCastingSpell)) {
+					player->AddSpell(settings->IsCastingSpell);
+				}
+			} else if (settings->IsCastingSpell && HasSpell(player, settings->IsCastingSpell)) {
+				player->RemoveSpell(settings->IsCastingSpell);
+			}
+
 			if (IsBowDrawNoZoomCheck(player, playerCamera)) {
 				if (!HasSpell(player, settings->BowStaminaSpell)) {
 					player->AddSpell(settings->BowStaminaSpell);
@@ -87,7 +95,7 @@ private:
 					player->AddSpell(settings->IsSneakingSpell);
 			}
 			else if(HasSpell(player, settings->IsSneakingSpell)) {
-					player->RemoveSpell(settings->IsSneakingSpell);
+				player->RemoveSpell(settings->IsSneakingSpell);
 			}
 		}
 
