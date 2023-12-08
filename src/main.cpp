@@ -88,6 +88,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		if (settings) {
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();
+			settings->ReplacePowerAttackKeywords();
 		}
 
 		break;

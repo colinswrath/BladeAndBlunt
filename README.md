@@ -7,7 +7,8 @@ This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616.
 **Adds specified spells in ini for the following scenarios:**  
 `IsAttacking`  
 `IsBlocking`  
-`IsSneaking`  
+`IsSneaking`
+`IsCasting`
 `Spell when drawing bow`  
 `Spell when firing xbow`  
 `Spell when reloading xbow`  
@@ -23,7 +24,8 @@ This was made for Blade and Blunt - A Combat Overhaul by SimonMagus616.
 `Injury system will apply injury stages based on damage taken`  
 `Support for injury health AV penalty`  
 `Handles parry and block stagger spells`  
-`Scans load order for all weapons and zeroes stagger values to let Simonrim handle stagger`  
+`Scans load order for all weapons and zeroes stagger values to let Simonrim handle stagger`
+`Replaces power attack keyword to differentiate from dual wield power attacks and power attacks while dual wielding`
 
 ## Requirements
 * [CMake](https://cmake.org/)

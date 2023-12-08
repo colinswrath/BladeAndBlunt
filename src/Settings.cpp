@@ -20,15 +20,18 @@ void Settings::LoadSettings()
 	enableLevelDifficulty = ini.GetBoolValue("", "bLevelBasedDifficulty", true);
 	zeroAllWeapStagger = ini.GetBoolValue("", "bZeroAllWeaponStagger", true);
 	armorScalingEnabled = ini.GetBoolValue("", "bArmorRatingScalingEnabled", true);
+	replaceAttackTypeKeywords = ini.GetBoolValue("", "bReplaceNewAttackTypeKeywords", true);
 
 	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
 	std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
 	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
 	std::string bowStaminaSpellFormID((ini.GetValue("", "BowStaminaSpellFormId", "")));
 	std::string xbowStaminaSpellFormID((ini.GetValue("", "XbowStaminaSpellFormId", "")));
+	std::string IsCastingFormId((ini.GetValue("", "IsCastingSpellFormId", "IsCastingSpellFormId")));
 	std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
 	std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
 	std::string blockStaggerPerkFormId((ini.GetValue("", "BlockStaggerPerkFormId", "")));
+	std::string dualWieldKeywordFormId((ini.GetValue("", "DualWieldReplacementKeyword", "")));
 
 	std::string injurySpell1FormID((ini.GetValue("", "InjurySpell1FormID", "")));
 	std::string injurySpell2FormID((ini.GetValue("", "InjurySpell2FormID", "")));
@@ -60,6 +63,10 @@ void Settings::LoadSettings()
 		XbowDrainStaminaFormId = ParseFormID(xbowStaminaSpellFormID);
 	}
 
+	if (!IsCastingFormId.empty()) {
+		IsCastingSpellFormId = ParseFormID(IsCastingFormId);
+	}
+
 	if (!bashPerkFormId.empty()) {
 		BashPerkFormId = ParseFormID(bashPerkFormId);
 	}
@@ -80,6 +87,9 @@ void Settings::LoadSettings()
 	}
 	if (!injurySpell3FormID.empty()) {
 		InjurySpell3FormId = ParseFormID(injurySpell3FormID);
+	}
+	if (!dualWieldKeywordFormId.empty()) {
+		DualWieldReplaceFormId = ParseFormID(dualWieldKeywordFormId);
 	}
 
 	FileName = fileName;
@@ -114,6 +124,49 @@ void Settings::AdjustWeaponStaggerVals()
 	}
 }
 
+void Settings::ReplacePowerAttackKeywords()
+{
+	if (replaceAttackTypeKeywords) {
+
+		logger::info("Swapping power attack types");
+		std::unordered_map<std::string, RE::BGSKeyword*> swaps;
+
+		//Hardcoded for now. This is all we need for b&b
+		swaps["attackPowerStartH2HCombo"] = DualWieldReplaceKeyword;
+		swaps["attackPowerStartDualWield"] = DualWieldReplaceKeyword;
+		auto targetEvent = std::string("PowerAttackTypeStanding");
+
+		auto dataHandler = RE::TESDataHandler::GetSingleton();
+		auto races = dataHandler->GetFormArray<RE::TESRace>();
+
+		for (auto raceCandidate : races) {
+			auto& attackDataMap = raceCandidate->attackDataMap.get()->attackDataMap;
+
+			for (auto& attackDataPtr : attackDataMap) {
+				std::string eventName = std::string(attackDataPtr.first.c_str());
+
+				auto eventIt = swaps.find(eventName);
+
+				if (eventIt != swaps.end()) {
+					auto attackType = attackDataPtr.second.get()->data.attackType;
+
+					if (attackType) {
+						auto attackTypeName = std::string(attackType->GetFormEditorID());
+						auto raceName = std::string(raceCandidate->GetFormEditorID());
+						if (attackTypeName == targetEvent) {
+							attackDataPtr.second.get()->data.attackType = eventIt->second;
+							auto replacedName = std::string(DualWieldReplaceKeyword->GetFormEditorID());
+							logger::info("Updated race: " + raceName + " - event: " + eventName + " - " + attackTypeName + " -> " + replacedName);
+						}
+					}
+				}
+			}
+		}
+
+		logger::info("Power attack types swapped");
+	}
+}
+
 void Settings::LoadForms()
 {
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
@@ -132,6 +185,9 @@ void Settings::LoadForms()
 
 	if (XbowDrainStaminaFormId)
 		XbowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(XbowDrainStaminaFormId, FileName));
+
+	if (IsCastingSpellFormId)
+		IsCastingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsCastingSpellFormId, FileName));
 
 	if (BashPerkFormId)
 		BashStaminaPerk = dataHandler->LookupForm(BashPerkFormId, "Update.esm")->As<RE::BGSPerk>();
@@ -154,6 +210,9 @@ void Settings::LoadForms()
 	if (InjurySpell3FormId)
 		InjurySpell3 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell3FormId, FileName));
 
+	if (DualWieldReplaceFormId)
+		DualWieldReplaceKeyword = dataHandler->LookupForm(DualWieldReplaceFormId, "Update.esm")->As<RE::BGSKeyword>();
+
 	//Hardcoded loads
 	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
 	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
@@ -168,6 +227,7 @@ void Settings::LoadForms()
 	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
+	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
 	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
 	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
 
@@ -201,6 +261,7 @@ void Settings::SetGlobalsAndGameSettings()
 	MAG_levelBasedDifficulty->value = enableLevelDifficulty;
 	MAG_InjuryAndRest->value = enableInjuries;
 	MAG_InjuriesSMOnly->value = SMOnlyEnableInjuries;
+	MAG_PowerAttackReplacement->value = replaceAttackTypeKeywords;
 
 	//Set fMaxArmorRating game setting
 	auto gameSettings = RE::GameSettingCollection::GetSingleton();
