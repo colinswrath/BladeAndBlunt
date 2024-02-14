@@ -14,6 +14,8 @@ public:
 	RE::FormID IsAttackingSpellFormId;
 	RE::FormID IsBlockingSpellFormId;
 	RE::FormID IsSneakingSpellFormId;
+	RE::FormID IsSprintingSpellFormId;
+	RE::FormID MountSprintingSpellFormId;
 	RE::FormID IsCastingSpellFormId;
 	RE::FormID BowDrainStaminaFormId;
 	RE::FormID XbowDrainStaminaFormId;
@@ -28,6 +30,8 @@ public:
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
+	RE::SpellItem* IsSprintingSpell;
+	RE::SpellItem* MountSprintingSpell;
 	RE::SpellItem* BowStaminaSpell;
 	RE::SpellItem* XbowStaminaSpell;
 	RE::SpellItem* IsCastingSpell;
@@ -78,6 +82,8 @@ public:
 	float injuryUpdateFrequency = 0.5f;
 
 	bool IsBlockingWeaponSpellCasted = false;
+
+	int maxFrameCheck = 6;
 
 	static RE::FormID ParseFormID(const std::string& str);
 
