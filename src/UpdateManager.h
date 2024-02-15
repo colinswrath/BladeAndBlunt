@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Conditions.h"
-#include "InjuryPenaltyManager.h"
 #include "Hooks.h"
+#include "InjuryPenaltyManager.h"
 
 static float lastTime;
 
@@ -24,78 +24,107 @@ public:
 
 private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
-	{	
+	{
 		auto settings = Settings::GetSingleton();
-		if (UpdateManager::frameCount > 6)
-		{
+
+		if (UpdateManager::frameCount > settings->maxFrameCheck) {
 			UpdateManager::frameCount = 0;
+		} else {
 			RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 			auto playerCamera = RE::PlayerCamera::GetSingleton();
 
-			if (player->IsCasting(nullptr)) {
-				if (settings->IsCastingSpell && !HasSpell(player, settings->IsCastingSpell)) {
-					player->AddSpell(settings->IsCastingSpell);
+			switch (UpdateManager::frameCount) {
+			case 1:
+				if (player->IsCasting(nullptr)) {
+					if (settings->IsCastingSpell && !HasSpell(player, settings->IsCastingSpell)) {
+						player->AddSpell(settings->IsCastingSpell);
+					}
+				} else if (settings->IsCastingSpell && HasSpell(player, settings->IsCastingSpell)) {
+					player->RemoveSpell(settings->IsCastingSpell);
 				}
-			} else if (settings->IsCastingSpell && HasSpell(player, settings->IsCastingSpell)) {
-				player->RemoveSpell(settings->IsCastingSpell);
-			}
+				break;
+			case 2:
+				if (IsBowDrawNoZoomCheck(player, playerCamera)) {
+					if (!HasSpell(player, settings->BowStaminaSpell)) {
+						player->AddSpell(settings->BowStaminaSpell);
+					}
+				} else if (HasSpell(player, settings->BowStaminaSpell)) {
+					player->RemoveSpell(settings->BowStaminaSpell);
+				}
+				break;
+			case 3:
+				if (IsXbowDrawCheck(player, playerCamera)) {
+					if (!HasSpell(player, settings->XbowStaminaSpell)) {
+						player->AddSpell(settings->XbowStaminaSpell);
+					}
+				} else if (HasSpell(player, settings->XbowStaminaSpell)) {
+					player->RemoveSpell(settings->XbowStaminaSpell);
+				}
+				break;
+			case 4:
+				if (IsAttacking(player)) {
+					if (!HasSpell(player, settings->IsAttackingSpell)) {
+						player->AddSpell(settings->IsAttackingSpell);
+					}
+				} else {
+					if (HasSpell(player, settings->IsAttackingSpell)) {
+						player->RemoveSpell(settings->IsAttackingSpell);
+					}
 
-			if (IsBowDrawNoZoomCheck(player, playerCamera)) {
-				if (!HasSpell(player, settings->BowStaminaSpell)) {
-					player->AddSpell(settings->BowStaminaSpell);
-				}
-			}
-			else if (HasSpell(player, settings->BowStaminaSpell)) {
-				player->RemoveSpell(settings->BowStaminaSpell);
-			}
+					if (IsBlocking(player)) {
+						auto leftHand = player->GetEquippedObject(true);
+						//Parry setup
+						if ((!leftHand || leftHand->IsWeapon()) && !settings->IsBlockingWeaponSpellCasted) {
+							settings->IsBlockingWeaponSpellCasted = true;
+							Conditions::ApplySpell(player, player, settings->MAGParryControllerSpell);
+						}
 
-			if (IsXbowDrawCheck(player, playerCamera)) {
-				if (!HasSpell(player, settings->XbowStaminaSpell)) {
-					player->AddSpell(settings->XbowStaminaSpell);
+						if (!HasSpell(player, settings->IsBlockingSpell)) {
+							player->AddSpell(settings->IsBlockingSpell);
+						}
+					} else {
+						if (HasSpell(player, settings->IsBlockingSpell)) {
+							player->RemoveSpell(settings->IsBlockingSpell);
+						}
+						settings->IsBlockingWeaponSpellCasted = false;
+					}
 				}
-			} else if (HasSpell(player, settings->XbowStaminaSpell)) {
-				player->RemoveSpell(settings->XbowStaminaSpell);
-			}
-
-			if (IsAttacking(player)) {
-				if (!HasSpell(player, settings->IsAttackingSpell)) {
-					player->AddSpell(settings->IsAttackingSpell);
+				break;
+			case 5:
+				if (player->IsSneaking() && IsMoving(player)) {
+					if (!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
+						player->AddSpell(settings->IsSneakingSpell);
+				} else if (HasSpell(player, settings->IsSneakingSpell)) {
+					player->RemoveSpell(settings->IsSneakingSpell);
 				}
-			}
-			else {
-				if (HasSpell(player, settings->IsAttackingSpell))
+				break;
+			case 6:
 				{
-					player->RemoveSpell(settings->IsAttackingSpell);
-				}
+					auto* state = player->AsActorState();
+					if (state->IsSprinting()) {
+						if (!HasSpell(player, settings->IsSprintingSpell))
+							player->AddSpell(settings->IsSprintingSpell);
 
-				if (IsBlocking(player)) {
-					auto leftHand = player->GetEquippedObject(true);
-					//Parry setup
-					if ((!leftHand || leftHand->IsWeapon()) && !settings->IsBlockingWeaponSpellCasted) {
-						settings->IsBlockingWeaponSpellCasted = true;
-						Conditions::ApplySpell(player, player, settings->MAGParryControllerSpell);
-					}
+						RE::ActorPtr mount = nullptr;
+						bool bPlayerHasMount = player->GetMount(mount);
+						if (bPlayerHasMount) {
+							mount->AddSpell(settings->MountSprintingSpell);
+						}
 
-					if (!HasSpell(player, settings->IsBlockingSpell))
-					{
-						player->AddSpell(settings->IsBlockingSpell);
+					} else if (HasSpell(player, settings->IsSprintingSpell)) {
+						player->RemoveSpell(settings->IsSprintingSpell);
+
+						RE::ActorPtr mount = nullptr;
+						bool bPlayerHasMount = player->GetMount(mount);
+
+						if (bPlayerHasMount) {
+							mount->RemoveSpell(settings->MountSprintingSpell);
+						}
 					}
 				}
-				else
-				{
-					if (HasSpell(player, settings->IsBlockingSpell)) {
-						player->RemoveSpell(settings->IsBlockingSpell);
-					}
-					settings->IsBlockingWeaponSpellCasted = false;
-				}
-			}
-			if (player->IsSneaking() && IsMoving(player))
-			{
-				if(!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
-					player->AddSpell(settings->IsSneakingSpell);
-			}
-			else if(HasSpell(player, settings->IsSneakingSpell)) {
-				player->RemoveSpell(settings->IsSneakingSpell);
+				break;
+			default:
+				break;
 			}
 		}
 
@@ -131,14 +160,14 @@ private:
 		}
 
 		switch (attackState) {
-			case RE::ATTACK_STATE_ENUM::kBowDrawn:
+		case RE::ATTACK_STATE_ENUM::kBowDrawn:
 			{
 				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kCrossbow) {
 					return true;
 				}
 				break;
 			}
-			default:
+		default:
 			{
 				break;
 			}
@@ -150,7 +179,7 @@ private:
 	{
 		auto attackState = player->AsActorState()->GetAttackState();
 
-		if (playerCamera->bowZoomedIn)
+		if (playerCamera->bowZoomedIn) 
 		{
 			return false;
 		}
@@ -161,21 +190,21 @@ private:
 		}
 
 		switch (attackState) {
-			case RE::ATTACK_STATE_ENUM::kBowDrawn:{
-				
-				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow){
-					return true;
-				}
-				break;
-			}
-			case RE::ATTACK_STATE_ENUM::kBowAttached:{
-
+		case RE::ATTACK_STATE_ENUM::kBowDrawn:
+			{
 				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow) {
 					return true;
 				}
 				break;
 			}
-			default:
+		case RE::ATTACK_STATE_ENUM::kBowAttached:
+			{
+				if (equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow) {
+					return true;
+				}
+				break;
+			}
+		default:
 			{
 				break;
 			}

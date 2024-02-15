@@ -25,9 +25,11 @@ void Settings::LoadSettings()
 	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
 	std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
 	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
+	std::string sprintingSpellFormId((ini.GetValue("", "IsSprintingSpellFormId", "")));
+	std::string mountSprintingSpellFormId((ini.GetValue("", "MountSprintingSpellFormId", "")));
 	std::string bowStaminaSpellFormID((ini.GetValue("", "BowStaminaSpellFormId", "")));
 	std::string xbowStaminaSpellFormID((ini.GetValue("", "XbowStaminaSpellFormId", "")));
-	std::string IsCastingFormId((ini.GetValue("", "IsCastingSpellFormId", "IsCastingSpellFormId")));
+	std::string IsCastingFormId((ini.GetValue("", "IsCastingSpellFormId", "")));
 	std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
 	std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
 	std::string blockStaggerPerkFormId((ini.GetValue("", "BlockStaggerPerkFormId", "")));
@@ -53,6 +55,14 @@ void Settings::LoadSettings()
 
 	if(!sneakingSpellFormID.empty()){
 		IsSneakingSpellFormId = ParseFormID(sneakingSpellFormID);
+	}
+
+	if (!sprintingSpellFormId.empty()) {
+		IsSprintingSpellFormId = ParseFormID(sprintingSpellFormId);
+	}
+
+	if (!mountSprintingSpellFormId.empty()) {
+		MountSprintingSpellFormId = ParseFormID(mountSprintingSpellFormId);
 	}
 
 	if (!bowStaminaSpellFormID.empty()){
@@ -104,7 +114,7 @@ RE::FormID Settings::ParseFormID(const std::string& str)
 	return result;
 }
 
-void Settings::AdjustWeaponStaggerVals() 
+void Settings::AdjustWeaponStaggerVals()
 {
 	if (zeroAllWeapStagger) {
 		logger::info("Adjusting weapon stagger values");
@@ -170,6 +180,14 @@ void Settings::ReplacePowerAttackKeywords()
 void Settings::LoadForms()
 {
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
+
+	auto file = dataHandler->LookupLoadedLightModByName("BladeAndBlunt.esp");
+
+	if (!file || file->compileIndex == 0xFF) {
+
+		SKSE::stl::report_and_fail("Cannot find BladeAndBlunt.esp. If you are on Skyrim 1.6.1130+, Engine Fixes' achievements enabler may be disabling all of your plugins."sv);
+	}
+
 	logger::info("Loading forms");
 	if (IsBlockingSpellFormId)
 		IsBlockingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsBlockingSpellFormId, FileName));
@@ -179,6 +197,12 @@ void Settings::LoadForms()
 
 	if(IsSneakingSpellFormId)
 		IsSneakingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsSneakingSpellFormId, FileName));
+
+	if (IsSprintingSpellFormId)
+		IsSprintingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsSprintingSpellFormId, FileName));
+
+	if (MountSprintingSpellFormId)
+		MountSprintingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(MountSprintingSpellFormId, FileName));
 
 	if(BowDrainStaminaFormId)
 		BowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(BowDrainStaminaFormId, FileName));
