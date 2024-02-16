@@ -166,7 +166,7 @@ void Settings::ReplacePowerAttackKeywords()
 						if (attackTypeName == targetEvent) {
 							attackDataPtr.second.get()->data.attackType = eventIt->second;
 							auto replacedName = std::string(DualWieldReplaceKeyword->GetFormEditorID());
-							logger::info("Updated race: " + raceName + " - event: " + eventName + " - " + attackTypeName + " -> " + replacedName);
+                            logger::info("Updated race: {} - event: {} - {} -> {}", raceName, eventName, attackTypeName, replacedName);
 						}
 					}
 				}
@@ -181,12 +181,12 @@ void Settings::LoadForms()
 {
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-	auto file = dataHandler->LookupLoadedLightModByName("BladeAndBlunt.esp");
+	/*auto file = dataHandler->LookupLoadedLightModByName("BladeAndBlunt.esp");
 
 	if (!file || file->compileIndex == 0xFF) {
 
 		SKSE::stl::report_and_fail("Cannot find BladeAndBlunt.esp. If you are on Skyrim 1.6.1130+, Engine Fixes' achievements enabler may be disabling all of your plugins."sv);
-	}
+	}*/
 
 	logger::info("Loading forms");
 	if (IsBlockingSpellFormId)
