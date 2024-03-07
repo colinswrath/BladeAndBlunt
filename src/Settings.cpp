@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include <SimpleIni.h>
 #include <sstream>
+#include "Cache.h"
 
 Settings* Settings::GetSingleton()
 {
@@ -181,12 +182,12 @@ void Settings::LoadForms()
 {
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-	/*auto file = dataHandler->LookupLoadedLightModByName("BladeAndBlunt.esp");
+	auto file = LookupLoadedLightModByName("BladeAndBlunt.esp");
 
 	if (!file || file->compileIndex == 0xFF) {
 
 		SKSE::stl::report_and_fail("Cannot find BladeAndBlunt.esp. If you are on Skyrim 1.6.1130+, Engine Fixes' achievements enabler may be disabling all of your plugins."sv);
-	}*/
+	}
 
 	logger::info("Loading forms");
 	if (IsBlockingSpellFormId)

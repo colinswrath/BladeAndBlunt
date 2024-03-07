@@ -53,6 +53,17 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 	}
 }
 
+extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version = []() {
+    SKSE::PluginVersionData v{};
+    v.PluginVersion(REL::Version{ 3,5,0,0 });
+    v.PluginName("BladeAndBlunt"sv);
+    v.AuthorName("colinswrath and Kernalsegg"sv);
+    v.UsesAddressLibrary(true);
+    v.HasNoStructUse(true);
+    v.UsesStructsPost629(false);
+    return v;
+}();
+
 SKSEPluginLoad(const SKSE::LoadInterface* skse)
 {
 	InitLogger();	//1.6
