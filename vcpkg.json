@@ -1,15 +1,21 @@
 {
-  "name": "bladeandblunt",
-  "version-string": "1.0.0",
-  "description": "Plugin for blade and blunt to utilize efficient status checking",
-  "homepage": "https://github.com/colinswrath/BladeAndBlunt",
-  "license": "MIT",
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "name": "blade-and-blunt",
+  "version-semver": "3.5.0",
   "dependencies": [
-    "boost-stl-interfaces",
-    "rsm-binary-io",
+    "fmt",
     "spdlog",
-	"simpleini",
-	"commonlibsse-ng",
-	"xbyak"
-  ]
+    "rapidcsv",
+    "simpleini",
+    "xbyak",
+    "clib-util"
+  ],
+  "license": "GPL-3.0-or-later",
+  "vcpkg-configuration": {
+    "default-registry": {
+      "kind": "git",
+      "repository": "https://github.com/microsoft/vcpkg",
+      "baseline": "095ee06e7f60dceef7d713e3f8b1c2eb10d650d7"
+    }
+  }
 }

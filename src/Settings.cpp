@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include <SimpleIni.h>
 #include <sstream>
+#include "Cache.h"
 
 Settings* Settings::GetSingleton()
 {
@@ -166,7 +167,7 @@ void Settings::ReplacePowerAttackKeywords()
 						if (attackTypeName == targetEvent) {
 							attackDataPtr.second.get()->data.attackType = eventIt->second;
 							auto replacedName = std::string(DualWieldReplaceKeyword->GetFormEditorID());
-							logger::info("Updated race: " + raceName + " - event: " + eventName + " - " + attackTypeName + " -> " + replacedName);
+                            logger::info("Updated race: {} - event: {} - {} -> {}", raceName, eventName, attackTypeName, replacedName);
 						}
 					}
 				}
@@ -181,7 +182,7 @@ void Settings::LoadForms()
 {
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
 
-	auto file = dataHandler->LookupLoadedLightModByName("BladeAndBlunt.esp");
+	auto file = LookupLoadedLightModByName("BladeAndBlunt.esp");
 
 	if (!file || file->compileIndex == 0xFF) {
 
