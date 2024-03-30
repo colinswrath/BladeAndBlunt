@@ -11,22 +11,6 @@ public:
 	void ReplacePowerAttackKeywords();
 	void SetGlobalsAndGameSettings();
 
-	RE::FormID IsAttackingSpellFormId;
-	RE::FormID IsBlockingSpellFormId;
-	RE::FormID IsSneakingSpellFormId;
-	RE::FormID IsSprintingSpellFormId;
-	RE::FormID MountSprintingSpellFormId;
-	RE::FormID IsCastingSpellFormId;
-	RE::FormID BowDrainStaminaFormId;
-	RE::FormID XbowDrainStaminaFormId;
-	RE::FormID BashPerkFormId;
-	RE::FormID BlockPerkFormId;
-	RE::FormID BlockStaggerPerkFormId;
-	RE::FormID InjurySpell1FormId;
-	RE::FormID InjurySpell2FormId;
-	RE::FormID InjurySpell3FormId;
-	RE::FormID DualWieldReplaceFormId;
-
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
@@ -49,7 +33,8 @@ public:
 	RE::BGSPerk* BlockStaminaPerk;
 	RE::BGSPerk* BlockStaggerPerk;
 
-	RE::TESGlobal* InjuryChance50Health;
+	RE::TESGlobal* InjuryChance90Health;
+    RE::TESGlobal* InjuryChance50Health;
 	RE::TESGlobal* InjuryChance25Health;
 	RE::TESGlobal* Survival_ModeEnabled;
 	RE::TESGlobal* MAG_InjuriesSMOnly;
@@ -107,5 +92,19 @@ public:
             }
         }
         return nullptr;
+    }
+
+    template<typename T>
+    T* LoadFormPointerFromIni(std::string formId, std::string filename)
+    {
+        if (!formId.empty()) {
+            auto objectFormId = ParseFormID(formId);
+            auto form         = RE::TESDataHandler::GetSingleton()->LookupForm(objectFormId, filename)->As<T>();
+            return form;
+        }
+        else {
+            return nullptr;
+        }
+        
     }
 };

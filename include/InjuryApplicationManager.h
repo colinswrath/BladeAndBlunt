@@ -58,24 +58,29 @@ private:
 	static void RollForInjuryEvent(float chanceMult = 1.0f)
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
-		auto health = Conditions::GetMaxHealth();
+		auto maxHealth = Conditions::GetMaxHealth();
 		auto settings = Settings::GetSingleton();
 
-		//If health below 25% roll for injury
-		if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
-			auto random = std::rand() % 100;
+        std::random_device rd;
+        auto random = clib_util::RNG(rd()).Generate<float>(0.0f, 100.0f);
+        auto health = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
 
-			if (random < settings->InjuryChance25Health->value * chanceMult) {
-				ApplyInjury();
-			}
-		} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
-			//Roll rand for injury
-			auto random = std::rand() % 100;
+        if (health < maxHealth * 0.25f) {   //25%
 
-			if (random < settings->InjuryChance50Health->value * chanceMult) {
+			if (settings->InjuryChance25Health && random <= settings->InjuryChance25Health->value * chanceMult) {
 				ApplyInjury();
 			}
 		}
+        else if (health <= maxHealth * 0.5f) {   //50%
+            if (settings->InjuryChance50Health && random < settings->InjuryChance50Health->value * chanceMult) {
+				ApplyInjury();
+			}
+        }
+        else if (health <= maxHealth * 0.9f) {  //90%
+            if (settings->InjuryChance90Health && random < settings->InjuryChance90Health->value * chanceMult) {
+                ApplyInjury();
+            }
+        }
 	}
 
 	static void ApplyInjury()

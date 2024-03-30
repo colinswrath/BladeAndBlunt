@@ -11,7 +11,7 @@ namespace Hooks
 	inline static REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::RelocationID(37792,38741), REL::Relocate(0x53,0x55) };
 	inline REL::Relocation<uintptr_t> arrow_release_handler{ REL::RelocationID(41778, 42859), REL::Relocate(0x133, 0x138) };
 	static REL::Relocation<std::uintptr_t> armorRating1(REL::RelocationID(42842, 44014));
-	static REL::Relocation<std::uintptr_t> armorRating2(REL::RelocationID(37605, 38558)); 
+	static REL::Relocation<std::uintptr_t> armorRating2(REL::RelocationID(37605, 38558));
 
 	bool InstallHooks();
 	bool InstallBashMultHook();
