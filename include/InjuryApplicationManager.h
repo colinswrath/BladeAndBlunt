@@ -23,7 +23,7 @@ public:
 
 			uint32_t roundedRunTime = RoundRunTime(runtime);
 			if (!ShouldSkipInjuryRoll(cause, target, roundedRunTime)) {
-				RollForInjuryEvent(targetBlocking ? 0.50f : 1.0f);
+				RollForInjuryEvent(targetBlocking || target->HasKeywordString("MagicWard"sv) ? 0.50f : 1.0f);
 				recentInjuryRolls.insert(std::make_pair(roundedRunTime, RecentHitEventData(target, cause, roundedRunTime)));
 			}
 		}
