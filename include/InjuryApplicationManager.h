@@ -63,21 +63,26 @@ private:
 
         std::random_device rd;
         auto random = clib_util::RNG(rd()).Generate<float>(0.0f, 100.0f);
-        auto health = player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth);
+        auto* avOwner = player->AsActorValueOwner();
+        auto health = avOwner->GetActorValue(RE::ActorValue::kHealth);
+        auto injuryResist = avOwner->GetActorValue(RE::ActorValue::kShieldPerks);
 
-        if (health < maxHealth * 0.25f) {   //25%
+        auto injuryResistMult = std::clamp((1 + injuryResist * -0.01f),0.25f,1.0f);
+        auto finalChanceMult = chanceMult * injuryResistMult;
 
-			if (settings->InjuryChance25Health && random <= settings->InjuryChance25Health->value * chanceMult) {
+        if (health <= maxHealth * 0.25f) {   //If health at or below 25%
+
+			if (settings->InjuryChance25Health && random < settings->InjuryChance25Health->value * finalChanceMult) {
 				ApplyInjury();
 			}
 		}
-        else if (health <= maxHealth * 0.5f) {   //50%
-            if (settings->InjuryChance50Health && random < settings->InjuryChance50Health->value * chanceMult) {
+        else if (health <= maxHealth * 0.5f) {   //If health at or below 50%
+            if (settings->InjuryChance50Health && random < settings->InjuryChance50Health->value * finalChanceMult) {
 				ApplyInjury();
 			}
         }
-        else if (health <= maxHealth * 0.9f) {  //90%
-            if (settings->InjuryChance90Health && random < settings->InjuryChance90Health->value * chanceMult) {
+        else if (health <= maxHealth * 0.9f) {  //If health at or below 90%
+            if (settings->InjuryChance90Health && random < settings->InjuryChance90Health->value * finalChanceMult) {
                 ApplyInjury();
             }
         }
