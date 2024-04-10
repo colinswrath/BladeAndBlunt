@@ -23,7 +23,7 @@ public:
 
 			uint32_t roundedRunTime = RoundRunTime(runtime);
 			if (!ShouldSkipInjuryRoll(cause, target, roundedRunTime)) {
-				RollForInjuryEvent(targetBlocking ? 0.50f : 1.0f);
+				RollForInjuryEvent(targetBlocking || target->HasKeywordString("MagicWard"sv) ? 0.50f : 1.0f);
 				recentInjuryRolls.insert(std::make_pair(roundedRunTime, RecentHitEventData(target, cause, roundedRunTime)));
 			}
 		}
@@ -58,24 +58,34 @@ private:
 	static void RollForInjuryEvent(float chanceMult = 1.0f)
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
-		auto health = Conditions::GetMaxHealth();
+		auto maxHealth = Conditions::GetMaxHealth();
 		auto settings = Settings::GetSingleton();
 
-		//If health below 25% roll for injury
-		if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.25f) {
-			auto random = std::rand() % 100;
+        std::random_device rd;
+        auto random = clib_util::RNG(rd()).Generate<float>(0.0f, 100.0f);
+        auto* avOwner = player->AsActorValueOwner();
+        auto health = avOwner->GetActorValue(RE::ActorValue::kHealth);
+        auto injuryResist = avOwner->GetActorValue(RE::ActorValue::kShieldPerks);
 
-			if (random < settings->InjuryChance25Health->value * chanceMult) {
-				ApplyInjury();
-			}
-		} else if (player->AsActorValueOwner()->GetActorValue(RE::ActorValue::kHealth) < health * 0.5f) {
-			//Roll rand for injury
-			auto random = std::rand() % 100;
+        auto injuryResistMult = std::clamp((1 + injuryResist * -0.01f),0.25f,1.0f);
+        auto finalChanceMult = chanceMult * injuryResistMult;
 
-			if (random < settings->InjuryChance50Health->value * chanceMult) {
+        if (health <= maxHealth * 0.25f) {   //If health at or below 25%
+
+			if (settings->InjuryChance25Health && random < settings->InjuryChance25Health->value * finalChanceMult) {
 				ApplyInjury();
 			}
 		}
+        else if (health <= maxHealth * 0.5f) {   //If health at or below 50%
+            if (settings->InjuryChance50Health && random < settings->InjuryChance50Health->value * finalChanceMult) {
+				ApplyInjury();
+			}
+        }
+        else if (health <= maxHealth * 0.9f) {  //If health at or below 90%
+            if (settings->InjuryChance90Health && random < settings->InjuryChance90Health->value * finalChanceMult) {
+                ApplyInjury();
+            }
+        }
 	}
 
 	static void ApplyInjury()

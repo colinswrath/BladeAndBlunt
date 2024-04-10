@@ -23,86 +23,11 @@ void Settings::LoadSettings()
 	armorScalingEnabled = ini.GetBoolValue("", "bArmorRatingScalingEnabled", true);
 	replaceAttackTypeKeywords = ini.GetBoolValue("", "bReplaceNewAttackTypeKeywords", true);
 
-	std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
-	std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
-	std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
-	std::string sprintingSpellFormId((ini.GetValue("", "IsSprintingSpellFormId", "")));
-	std::string mountSprintingSpellFormId((ini.GetValue("", "MountSprintingSpellFormId", "")));
-	std::string bowStaminaSpellFormID((ini.GetValue("", "BowStaminaSpellFormId", "")));
-	std::string xbowStaminaSpellFormID((ini.GetValue("", "XbowStaminaSpellFormId", "")));
-	std::string IsCastingFormId((ini.GetValue("", "IsCastingSpellFormId", "")));
-	std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
-	std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
-	std::string blockStaggerPerkFormId((ini.GetValue("", "BlockStaggerPerkFormId", "")));
-	std::string dualWieldKeywordFormId((ini.GetValue("", "DualWieldReplacementKeyword", "")));
-
-	std::string injurySpell1FormID((ini.GetValue("", "InjurySpell1FormID", "")));
-	std::string injurySpell2FormID((ini.GetValue("", "InjurySpell2FormID", "")));
-	std::string injurySpell3FormID((ini.GetValue("", "InjurySpell3FormID", "")));
-
 	injury1AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury1AVPercent", 0.10));
 	injury2AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury2AVPercent", 0.25));
 	injury3AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury3AVPercent", 0.50));
 
 	std::string fileName(ini.GetValue("", "sModFileName", ""));
-
-	if(!attackingSpellFormID.empty()){
-		IsAttackingSpellFormId = ParseFormID(attackingSpellFormID);
-	}
-
-	if(!blockingSpellFormID.empty()){
-		IsBlockingSpellFormId = ParseFormID(blockingSpellFormID);
-	}
-
-	if(!sneakingSpellFormID.empty()){
-		IsSneakingSpellFormId = ParseFormID(sneakingSpellFormID);
-	}
-
-	if (!sprintingSpellFormId.empty()) {
-		IsSprintingSpellFormId = ParseFormID(sprintingSpellFormId);
-	}
-
-	if (!mountSprintingSpellFormId.empty()) {
-		MountSprintingSpellFormId = ParseFormID(mountSprintingSpellFormId);
-	}
-
-	if (!bowStaminaSpellFormID.empty()){
-		BowDrainStaminaFormId = ParseFormID(bowStaminaSpellFormID);
-	}
-
-	if (!xbowStaminaSpellFormID.empty()) {
-		XbowDrainStaminaFormId = ParseFormID(xbowStaminaSpellFormID);
-	}
-
-	if (!IsCastingFormId.empty()) {
-		IsCastingSpellFormId = ParseFormID(IsCastingFormId);
-	}
-
-	if (!bashPerkFormId.empty()) {
-		BashPerkFormId = ParseFormID(bashPerkFormId);
-	}
-
-	if (!blockPerkFormId.empty()) {
-		BlockPerkFormId = ParseFormID(blockPerkFormId);
-	}
-
-	if (!blockStaggerPerkFormId.empty()) {
-		BlockStaggerPerkFormId = ParseFormID(blockStaggerPerkFormId);
-	}
-
-	if (!injurySpell1FormID.empty()) {
-		InjurySpell1FormId = ParseFormID(injurySpell1FormID);
-	}
-	if (!injurySpell2FormID.empty()) {
-		InjurySpell2FormId = ParseFormID(injurySpell2FormID);
-	}
-	if (!injurySpell3FormID.empty()) {
-		InjurySpell3FormId = ParseFormID(injurySpell3FormID);
-	}
-	if (!dualWieldKeywordFormId.empty()) {
-		DualWieldReplaceFormId = ParseFormID(dualWieldKeywordFormId);
-	}
-
 	FileName = fileName;
 }
 
@@ -151,6 +76,10 @@ void Settings::ReplacePowerAttackKeywords()
 		auto races = dataHandler->GetFormArray<RE::TESRace>();
 
 		for (auto raceCandidate : races) {
+            if (raceCandidate->IsDeleted()) {
+                continue;
+            }
+
 			auto& attackDataMap = raceCandidate->attackDataMap.get()->attackDataMap;
 
 			for (auto& attackDataPtr : attackDataMap) {
@@ -163,10 +92,11 @@ void Settings::ReplacePowerAttackKeywords()
 
 					if (attackType) {
 						auto attackTypeName = std::string(attackType->GetFormEditorID());
-						auto raceName = std::string(raceCandidate->GetFormEditorID());
+						auto raceName = std::string(raceCandidate->GetName());
 						if (attackTypeName == targetEvent) {
 							attackDataPtr.second.get()->data.attackType = eventIt->second;
 							auto replacedName = std::string(DualWieldReplaceKeyword->GetFormEditorID());
+
                             logger::info("Updated race: {} - event: {} - {} -> {}", raceName, eventName, attackTypeName, replacedName);
 						}
 					}
@@ -180,63 +110,73 @@ void Settings::ReplacePowerAttackKeywords()
 
 void Settings::LoadForms()
 {
+	logger::info("Loading forms");
 	auto dataHandler = RE::TESDataHandler::GetSingleton();
+    CSimpleIniA ini;
+    ini.SetUnicode();
+    ini.LoadFile(R"(.\Data\SKSE\Plugins\BladeAndBlunt.ini)");
 
 	auto file = LookupLoadedLightModByName("BladeAndBlunt.esp");
-
 	if (!file || file->compileIndex == 0xFF) {
 
 		SKSE::stl::report_and_fail("Cannot find BladeAndBlunt.esp. If you are on Skyrim 1.6.1130+, Engine Fixes' achievements enabler may be disabling all of your plugins."sv);
 	}
 
-	logger::info("Loading forms");
-	if (IsBlockingSpellFormId)
-		IsBlockingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsBlockingSpellFormId, FileName));
+    //BnB esp forms
+    std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
+    IsAttackingSpell = LoadFormPointerFromIni<RE::SpellItem>(attackingSpellFormID, FileName);
 
-	if(IsAttackingSpellFormId)
-		IsAttackingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsAttackingSpellFormId, FileName));
+    std::string blockingSpellFormID((ini.GetValue("", "IsBlockingSpellFormId", "")));
+    IsBlockingSpell = LoadFormPointerFromIni<RE::SpellItem>(blockingSpellFormID, FileName);
 
-	if(IsSneakingSpellFormId)
-		IsSneakingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsSneakingSpellFormId, FileName));
+    std::string sneakingSpellFormID((ini.GetValue("", "IsSneakingSpellFormId", "")));
+    IsSneakingSpell = LoadFormPointerFromIni<RE::SpellItem>(sneakingSpellFormID, FileName);
 
-	if (IsSprintingSpellFormId)
-		IsSprintingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsSprintingSpellFormId, FileName));
+    std::string sprintingSpellFormId((ini.GetValue("", "IsSprintingSpellFormId", "")));
+    IsSprintingSpell = LoadFormPointerFromIni<RE::SpellItem>(sprintingSpellFormId, FileName);
 
-	if (MountSprintingSpellFormId)
-		MountSprintingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(MountSprintingSpellFormId, FileName));
+    std::string mountSprintingSpellFormId((ini.GetValue("", "MountSprintingSpellFormId", "")));
+    MountSprintingSpell = LoadFormPointerFromIni<RE::SpellItem>(mountSprintingSpellFormId, FileName);
 
-	if(BowDrainStaminaFormId)
-		BowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(BowDrainStaminaFormId, FileName));
+    std::string bowStaminaSpellFormID((ini.GetValue("", "BowStaminaSpellFormId", "")));
+    BowStaminaSpell = LoadFormPointerFromIni<RE::SpellItem>(bowStaminaSpellFormID, FileName);
 
-	if (XbowDrainStaminaFormId)
-		XbowStaminaSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(XbowDrainStaminaFormId, FileName));
+    std::string xbowStaminaSpellFormID((ini.GetValue("", "XbowStaminaSpellFormId", "")));
+    XbowStaminaSpell = LoadFormPointerFromIni<RE::SpellItem>(xbowStaminaSpellFormID, FileName);
 
-	if (IsCastingSpellFormId)
-		IsCastingSpell = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(IsCastingSpellFormId, FileName));
+    std::string IsCastingFormId((ini.GetValue("", "IsCastingSpellFormId", "")));
+    IsCastingSpell = LoadFormPointerFromIni<RE::SpellItem>(IsCastingFormId, FileName);
 
-	if (BashPerkFormId)
-		BashStaminaPerk = dataHandler->LookupForm(BashPerkFormId, "Update.esm")->As<RE::BGSPerk>();
+    std::string injurySpell1FormID((ini.GetValue("", "InjurySpell1FormID", "")));
+    InjurySpell1 = LoadFormPointerFromIni<RE::SpellItem>(injurySpell1FormID, FileName);
 
-	if (BlockPerkFormId)
-		BlockStaminaPerk = dataHandler->LookupForm(BlockPerkFormId, "Update.esm")->As<RE::BGSPerk>();
+    std::string injurySpell2FormID((ini.GetValue("", "InjurySpell2FormID", "")));
+    InjurySpell2 = LoadFormPointerFromIni<RE::SpellItem>(injurySpell2FormID, FileName);
 
-	if (BlockStaggerPerkFormId)
-		BlockStaggerPerk = dataHandler->LookupForm(BlockStaggerPerkFormId, "Update.esm")->As<RE::BGSPerk>();
+    std::string injurySpell3FormID((ini.GetValue("", "InjurySpell3FormID", "")));
+    InjurySpell3 = LoadFormPointerFromIni<RE::SpellItem>(injurySpell3FormID, FileName);
 
-	if (InjurySpell3FormId)
-		InjurySpell3 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell3FormId, FileName));
+    //Injected Forms
+    std::string injuryGlobal25FormId((ini.GetValue("", "InjuryChance25GlobalFormId", "")));
+    InjuryChance25Health = LoadFormPointerFromIni<RE::TESGlobal>(injuryGlobal25FormId, "Update.esm");
 
-	if (InjurySpell1FormId)
-		InjurySpell1 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell1FormId, FileName));
+    std::string injuryGlobal50FormId((ini.GetValue("", "InjuryChance50GlobalFormId", "")));
+    InjuryChance50Health = LoadFormPointerFromIni<RE::TESGlobal>(injuryGlobal50FormId, "Update.esm");
 
-	if (InjurySpell2FormId)
-		InjurySpell2 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell2FormId, FileName));
+    std::string injuryGlobal90FormId((ini.GetValue("", "InjuryChance90GlobalFormId", "")));
+    InjuryChance90Health = LoadFormPointerFromIni<RE::TESGlobal>(injuryGlobal90FormId, "Update.esm");
 
-	if (InjurySpell3FormId)
-		InjurySpell3 = skyrim_cast<RE::SpellItem*>(dataHandler->LookupForm(InjurySpell3FormId, FileName));
+    std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
+    BashStaminaPerk = LoadFormPointerFromIni<RE::BGSPerk>(bashPerkFormId, "Update.esm");
 
-	if (DualWieldReplaceFormId)
-		DualWieldReplaceKeyword = dataHandler->LookupForm(DualWieldReplaceFormId, "Update.esm")->As<RE::BGSKeyword>();
+    std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
+    BlockStaminaPerk = LoadFormPointerFromIni<RE::BGSPerk>(blockPerkFormId, "Update.esm");
+
+    std::string blockStaggerPerkFormId((ini.GetValue("", "BlockStaggerPerkFormId", "")));
+    BlockStaggerPerk = LoadFormPointerFromIni<RE::BGSPerk>(blockStaggerPerkFormId, "Update.esm");
+
+    std::string dualWieldKeywordFormId((ini.GetValue("", "DualWieldReplacementKeyword", "")));
+    DualWieldReplaceKeyword = LoadFormPointerFromIni<RE::BGSKeyword>(dualWieldKeywordFormId, "Update.esm");
 
 	//Hardcoded loads
 	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
@@ -244,8 +184,6 @@ void Settings::LoadForms()
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
 	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
-	InjuryChance25Health = dataHandler->LookupForm(ParseFormID("0xADA180"), "Update.esm")->As<RE::TESGlobal>();
-	InjuryChance50Health = dataHandler->LookupForm(ParseFormID("0xADA181"), "Update.esm")->As<RE::TESGlobal>();
 	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
 	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
 	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();

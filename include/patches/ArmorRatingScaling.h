@@ -27,10 +27,8 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, ptr[rbp + 0x77]);
-				sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				add(rsp, 0x20);
-				movss(ptr[rbp + 0x77], xmm0);
+				movss(xmm1, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
 
@@ -50,9 +48,7 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, xmm7);
-				sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				add(rsp, 0x20);
 				movss(xmm7, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
@@ -65,8 +61,8 @@ namespace ArmorRatingScaling
 			}
 		};
 
-		ratingPatch code1{ Hooks::armorRating1.address() + 0x10D };
-		ratingPatch2 code2{ Hooks::armorRating2.address() + 0x94 };
+		ratingPatch code1{ Hooks::armorRating1.address() + 0x108 };
+        ratingPatch2 code2{ Hooks::armorRating2.address() + 0x94};
 
 		auto& trampoline = SKSE::GetTrampoline();
 		trampoline.write_branch<6>(Hooks::armorRating1.address() + 0xF9, trampoline.allocate(code1));
@@ -85,10 +81,8 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, ptr[rbp + 0x77]);
-				sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				add(rsp, 0x20);
-				movss(ptr[rbp + 0x77], xmm0);
+                movss(xmm1, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
 
@@ -108,9 +102,7 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, xmm8);
-				sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				add(rsp, 0x20);
 				movss(xmm8, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
@@ -123,7 +115,7 @@ namespace ArmorRatingScaling
 			}
 		};
 
-		ratingPatch code1{ Hooks::armorRating1.address() + 0x115 };
+		ratingPatch code1{ Hooks::armorRating1.address() + 0x110 };
 		ratingPatch2 code2{ Hooks::armorRating2.address() + 0x99 };
 
 		auto& trampoline = SKSE::GetTrampoline();
