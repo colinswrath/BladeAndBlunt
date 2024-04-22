@@ -27,7 +27,9 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, ptr[rbp + 0x77]);
+                sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
+                add(rsp, 0x20);
 				movss(xmm1, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
@@ -48,8 +50,10 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, xmm7);
+                sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				movss(xmm7, xmm0);
+                add(rsp, 0x20);
+				movaps(xmm7, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
 
@@ -102,8 +106,10 @@ namespace ArmorRatingScaling
 				Xbyak::Label returnLabel;
 
 				movss(xmm0, xmm8);
+                sub(rsp, 0x20);
 				call(ptr[rip + funcLabel]);
-				movss(xmm8, xmm0);
+                add(rsp, 0x20);
+				movaps(xmm8, xmm0);
 
 				jmp(ptr[rip + returnLabel]);
 
