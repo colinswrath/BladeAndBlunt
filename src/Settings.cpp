@@ -116,12 +116,6 @@ void Settings::LoadForms()
     ini.SetUnicode();
     ini.LoadFile(R"(.\Data\SKSE\Plugins\BladeAndBlunt.ini)");
 
-	auto file = LookupLoadedLightModByName("BladeAndBlunt.esp");
-	if (!file || file->compileIndex == 0xFF) {
-
-		SKSE::stl::report_and_fail("Cannot find BladeAndBlunt.esp. If you are on Skyrim 1.6.1130+, Engine Fixes' achievements enabler may be disabling all of your plugins."sv);
-	}
-
     //BnB esp forms
     std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
     IsAttackingSpell = LoadFormPointerFromIni<RE::SpellItem>(attackingSpellFormID, FileName);
@@ -155,6 +149,15 @@ void Settings::LoadForms()
 
     std::string injurySpell3FormID((ini.GetValue("", "InjurySpell3FormID", "")));
     InjurySpell3 = LoadFormPointerFromIni<RE::SpellItem>(injurySpell3FormID, FileName);
+
+    std::string jumpSpellFormID((ini.GetValue("", "JumpSpellFormID", "")));
+    jumpSpell = LoadFormPointerFromIni<RE::SpellItem>(jumpSpellFormID, FileName);
+
+    std::string swimmingSpellFormID((ini.GetValue("", "SwimmingSpellFormId", "")));
+    IsSwimmingSpell = LoadFormPointerFromIni<RE::SpellItem>(swimmingSpellFormID, FileName);
+
+    std::string powerAttackStopSpellFormId((ini.GetValue("", "PowerAttackStopSpellFormId", "")));
+    PowerAttackStopSpell = LoadFormPointerFromIni<RE::SpellItem>(powerAttackStopSpellFormId, FileName);
 
     //Injected Forms
     std::string injuryGlobal25FormId((ini.GetValue("", "InjuryChance25GlobalFormId", "")));
@@ -206,14 +209,6 @@ void Settings::LoadForms()
 	}	
 
 	SetGlobalsAndGameSettings();
-
-	auto isPowerAttacking = new RE::TESConditionItem;
-	isPowerAttacking->data.comparisonValue.f = 1.0f;
-	isPowerAttacking->data.functionData.function = RE::FUNCTION_DATA::FunctionID::kIsPowerAttacking;
-
-	auto isPowerAttackingCond = new RE::TESCondition;
-	isPowerAttackingCond->head = isPowerAttacking;
-	IsPowerAttacking = isPowerAttackingCond;
 
 	logger::info("Forms loaded");
 

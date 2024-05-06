@@ -15,7 +15,7 @@ public:
 		return &appHandler;
 	}
 
-	void ProcessHitInjuryApplication(RE::Actor* cause, RE::Actor* target, uint32_t runtime, bool targetBlocking)
+	void ProcessHitInjuryApplication(RE::Actor* cause, RE::Actor* target, uint32_t runtime, float chanceMult)
 	{
 		auto settings = Settings::GetSingleton();
 		if (((settings->enableInjuries && !settings->SMOnlyEnableInjuries) ||
@@ -23,7 +23,7 @@ public:
 
 			uint32_t roundedRunTime = RoundRunTime(runtime);
 			if (!ShouldSkipInjuryRoll(cause, target, roundedRunTime)) {
-				RollForInjuryEvent(targetBlocking || target->HasKeywordString("MagicWard"sv) ? 0.50f : 1.0f);
+                RollForInjuryEvent(chanceMult);
 				recentInjuryRolls.insert(std::make_pair(roundedRunTime, RecentHitEventData(target, cause, roundedRunTime)));
 			}
 		}
@@ -68,7 +68,7 @@ private:
         auto injuryResist = avOwner->GetActorValue(RE::ActorValue::kShieldPerks);
 
         auto injuryResistMult = std::clamp((1 + injuryResist * -0.01f),0.25f,1.0f);
-        auto finalChanceMult = chanceMult * injuryResistMult;
+        auto finalChanceMult  = chanceMult * injuryResistMult;
 
         if (health <= maxHealth * 0.25f) {   //If health at or below 25%
 
