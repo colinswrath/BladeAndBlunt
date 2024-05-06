@@ -62,11 +62,17 @@ public:
 				}
 
 				bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
+                bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
 
 				if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
 
-					auto injuryManager = InjuryApplicationManager::GetSingleton();
-					injuryManager->ProcessHitInjuryApplication(causeActor,targetActor,applicationRuntime,isBlocking);
+                    float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
+
+                    //Incoming spells while warding do not injure
+                    if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
+					    auto injuryManager = InjuryApplicationManager::GetSingleton();
+                        injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);
+                    }
 				}
 
 				auto leftHand = targetActor->GetEquippedObject(true);
@@ -136,6 +142,72 @@ public:
 		RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
 		eventHolder->AddEventSink(OnHitEventHandler::GetSingleton());
 	}
+};
+
+class AnimationGraphEventHandler : public RE::BSTEventSink<RE::BSAnimationGraphEvent>, public RE::BSTEventSink<RE::TESObjectLoadedEvent>
+{
+public:
+
+    static AnimationGraphEventHandler* GetSingleton()
+    {
+        static AnimationGraphEventHandler singleton;
+        return &singleton;
+    }
+
+    const char* jumpAnimEventString = "JumpUp";
+
+    //Anims
+    RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource) override
+    {
+        if (!a_event) {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        if (!a_event->tag.empty() && a_event->holder && a_event->holder->As<RE::Actor>()) {
+            if (std::strcmp(a_event->tag.c_str(), jumpAnimEventString) == 0) {
+
+                HandleJumpAnim();
+            }
+        }
+        
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    void HandleJumpAnim()
+    {
+        auto settings = Settings::GetSingleton();
+        auto player   = RE::PlayerCharacter::GetSingleton();
+        if (!player->IsGodMode()) {
+            Conditions::ApplySpell(player, player, settings->jumpSpell);
+        }
+    }
+
+    //Object load
+    RE::BSEventNotifyControl ProcessEvent(const RE::TESObjectLoadedEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_eventSource) override
+    {
+        if (!a_event) {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+        
+        const auto actor = RE::TESForm::LookupByID<RE::Actor>(a_event->formID);
+        if (!actor || !actor->IsPlayerRef()) {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        //Register for anim event
+        actor->RemoveAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
+        actor->AddAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
+
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    static void Register()
+    {
+
+        //Register for load event, then in the load event register for anims
+        RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
+        eventHolder->AddEventSink<RE::TESObjectLoadedEvent>(AnimationGraphEventHandler::GetSingleton());
+    }
 };
 
 class WeaponFireHandler

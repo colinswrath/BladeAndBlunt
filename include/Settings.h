@@ -14,7 +14,8 @@ public:
 	RE::SpellItem* IsAttackingSpell;
 	RE::SpellItem* IsBlockingSpell;
 	RE::SpellItem* IsSneakingSpell;
-	RE::SpellItem* IsSprintingSpell;
+    RE::SpellItem* IsSprintingSpell;
+    RE::SpellItem* IsSwimmingSpell;
 	RE::SpellItem* MountSprintingSpell;
 	RE::SpellItem* BowStaminaSpell;
 	RE::SpellItem* XbowStaminaSpell;
@@ -27,7 +28,9 @@ public:
 
 	RE::SpellItem* InjurySpell1;
 	RE::SpellItem* InjurySpell2;
-	RE::SpellItem* InjurySpell3;
+    RE::SpellItem* InjurySpell3;
+    RE::SpellItem* jumpSpell;
+    RE::SpellItem* PowerAttackStopSpell;
 	
 	RE::BGSPerk* BashStaminaPerk;
 	RE::BGSPerk* BlockStaminaPerk;
@@ -50,8 +53,6 @@ public:
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
 
-	RE::TESCondition* IsPowerAttacking;
-
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;
 	bool enableSneakStaminaCost;
@@ -60,6 +61,8 @@ public:
 	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
 	bool starfrostInstalled;
+
+    bool wasPowerAttacking=false;
 	
 	float injury1AVPercent;
 	float injury2AVPercent;

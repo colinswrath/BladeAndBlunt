@@ -49,6 +49,9 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			settings->ReplacePowerAttackKeywords();
 		}
 
+        AnimationGraphEventHandler::Register();
+        OnHitEventHandler::Register();
+
 		break;
 	}
 }
@@ -82,8 +85,6 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 		logger::error("Hook installation failed.");
 		return false;
 	}
-
-	OnHitEventHandler::Register();
 
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener(InitListener))

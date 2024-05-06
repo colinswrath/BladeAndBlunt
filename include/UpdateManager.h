@@ -58,6 +58,9 @@ private:
 
                 if (settings->IsSprintingSpell)
                     player->RemoveSpell(settings->IsSprintingSpell);
+
+                if (settings->IsSwimmingSpell)
+                    player->RemoveSpell(settings->IsSwimmingSpell);
             }
             else {
 			    switch (UpdateManager::frameCount) {
@@ -93,10 +96,18 @@ private:
 					    if (!HasSpell(player, settings->IsAttackingSpell)) {
 						    player->AddSpell(settings->IsAttackingSpell);
 					    }
+
+                        settings->wasPowerAttacking = Conditions::IsPowerAttacking(player);
+
 				    } else {
 					    if (HasSpell(player, settings->IsAttackingSpell)) {
 						    player->RemoveSpell(settings->IsAttackingSpell);
 					    }
+
+                        if (settings->wasPowerAttacking) {
+                            settings->wasPowerAttacking = false;
+                            Conditions::ApplySpell(player, player, settings->PowerAttackStopSpell);
+                        }
 
 					    if (IsBlocking(player)) {
 						    auto leftHand = player->GetEquippedObject(true);
@@ -124,6 +135,15 @@ private:
 				    } else if (HasSpell(player, settings->IsSneakingSpell)) {
 					    player->RemoveSpell(settings->IsSneakingSpell);
 				    }
+
+                    if (player->AsActorState()->IsSwimming() && IsMoving(player)) {
+                        if (!HasSpell(player, settings->IsSwimmingSpell))
+                            player->AddSpell(settings->IsSwimmingSpell);
+                    }
+                    else if (HasSpell(player, settings->IsSwimmingSpell)) {
+                        player->RemoveSpell(settings->IsSwimmingSpell);
+                    }
+
 				    break;
 			    case 6:
 				    {

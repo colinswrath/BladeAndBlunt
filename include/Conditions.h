@@ -76,18 +76,25 @@ namespace Conditions
 		}
 	}
 
+    static inline bool IsPowerAttacking(RE::Actor* actor) {
+        if (auto high = actor->GetHighProcess()) {
+            if (const auto attackData = high->attackData) {
+                auto flags = attackData->data.flags;
+
+                if (flags && flags.any(RE::AttackData::AttackFlag::kPowerAttack)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 	static inline float GetMaxHealth()
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
 
 		return player->GetActorValueModifier(RE::ACTOR_VALUE_MODIFIER::kTemporary, RE::ActorValue::kHealth) +
 		       player->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth);
-	}
-
-	static inline bool IsPowerAttacking(RE::Actor* actor) 
-	{
-		auto settings = Settings::GetSingleton();
-		return settings->IsPowerAttacking->IsTrue(actor, nullptr);
 	}
 
 	//Credit: KernalsEgg for ApplySpell and IsPermanent
