@@ -144,7 +144,11 @@ public:
 	}
 };
 
-class AnimationGraphEventHandler : public RE::BSTEventSink<RE::BSAnimationGraphEvent>, public RE::BSTEventSink<RE::TESObjectLoadedEvent>
+class AnimationGraphEventHandler :
+    public RE::BSTEventSink<RE::BSAnimationGraphEvent>,
+    public RE::BSTEventSink<RE::TESObjectLoadedEvent>,
+    public RE::BSTEventSink<RE::TESSwitchRaceCompleteEvent>
+
 {
 public:
 
@@ -195,7 +199,24 @@ public:
         }
 
         //Register for anim event
-        actor->RemoveAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
+        actor->AddAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
+
+        return RE::BSEventNotifyControl::kContinue;
+    }
+
+    // Race Switch
+    RE::BSEventNotifyControl ProcessEvent(const RE::TESSwitchRaceCompleteEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESSwitchRaceCompleteEvent>* a_eventSource) override
+    {
+        if (!a_event) {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        const auto actor = a_event->subject->As<RE::Actor>();
+        if (!actor || !actor->IsPlayerRef()) {
+            return RE::BSEventNotifyControl::kContinue;
+        }
+
+        // Register for anim event
         actor->AddAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
 
         return RE::BSEventNotifyControl::kContinue;
@@ -206,7 +227,8 @@ public:
 
         //Register for load event, then in the load event register for anims
         RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-        eventHolder->AddEventSink<RE::TESObjectLoadedEvent>(AnimationGraphEventHandler::GetSingleton());
+        eventHolder->AddEventSink<RE::TESObjectLoadedEvent>(GetSingleton());
+        eventHolder->AddEventSink<RE::TESSwitchRaceCompleteEvent>(GetSingleton());
     }
 };
 
