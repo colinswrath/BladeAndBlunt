@@ -45,7 +45,6 @@ private:
 				break;
 			}
 		}
-
 		//Remove all events older than 1 second from runtime
 		auto it = recentInjuryRolls.begin();
 		while (it != secondRuntime) {
@@ -71,7 +70,6 @@ private:
         auto finalChanceMult  = chanceMult * injuryResistMult;
 
         if (health <= maxHealth * 0.25f) {   //If health at or below 25%
-
 			if (settings->InjuryChance25Health && random < settings->InjuryChance25Health->value * finalChanceMult) {
 				ApplyInjury();
 			}

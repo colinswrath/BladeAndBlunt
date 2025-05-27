@@ -35,66 +35,66 @@ public:
 		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto applicationRuntime = GetDurationOfApplicationRunTime();
 
-			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);	//Filters out dupe events
+			if (ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime)) {
+                return RE::BSEventNotifyControl::kContinue;
+            } // Filters out dupe events
+			
+			auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
+			auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
 
-			if (!skipEvent) {			
-				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
-				auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
-
-				//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
-				//We can work around it like this
-				bool powerAttackMelee = false;
-				if (a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) || Conditions::IsPowerAttacking(causeActor)) {
-					bool rightIsMeleeWeapon = false;
-					if (auto rightHandForm = causeActor->GetEquippedObject(false)) {
-						if (rightHandForm->IsWeapon() && rightHandForm->As<RE::TESObjectWEAP>()->IsMelee()) {
-							rightIsMeleeWeapon = true;
-						}
-					}
-
-					bool LeftIsMeleeWeaponOrNone = false;
-					auto leftHandForm = causeActor->GetEquippedObject(true);
-					if (!leftHandForm || (leftHandForm->IsWeapon() && leftHandForm->As<RE::TESObjectWEAP>()->IsMelee()) || leftHandForm->IsArmor()) {
-						LeftIsMeleeWeaponOrNone = true;
-					}
-
-					if (rightIsMeleeWeapon && LeftIsMeleeWeaponOrNone) {
-						powerAttackMelee = true;
+			//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
+			//We can work around it like this
+			bool powerAttackMelee = false;
+			if (a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) || Conditions::IsPowerAttacking(causeActor)) {
+				bool rightIsMeleeWeapon = false;
+				if (auto rightHandForm = causeActor->GetEquippedObject(false)) {
+					if (rightHandForm->IsWeapon() && rightHandForm->As<RE::TESObjectWEAP>()->IsMelee()) {
+						rightIsMeleeWeapon = true;
 					}
 				}
 
-				bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
-                bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
-
-				if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
-
-                    float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
-
-                    //Incoming spells while warding do not injure
-                    if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
-					    auto injuryManager = InjuryApplicationManager::GetSingleton();
-                        injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);
-                    }
+				bool LeftIsMeleeWeaponOrNone = false;
+				auto leftHandForm = causeActor->GetEquippedObject(true);
+				if (!leftHandForm || (leftHandForm->IsWeapon() && leftHandForm->As<RE::TESObjectWEAP>()->IsMelee()) || leftHandForm->IsArmor()) {
+					LeftIsMeleeWeaponOrNone = true;
 				}
 
-				auto leftHand = targetActor->GetEquippedObject(true);
-
-				bool blockedMeleeHit = false;
-				if (!a_event->projectile && 
-					((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
-					isBlocking) {
-					blockedMeleeHit = true;
+				if (rightIsMeleeWeapon && LeftIsMeleeWeaponOrNone) {
+					powerAttackMelee = true;
 				}
-				
-				//Shield Stagger
-				if (leftHand && leftHand->IsArmor() && blockedMeleeHit){
-					ProcessHitEventForBlockStagger(targetActor, causeActor);
-				} else if (blockedMeleeHit) {
-					//Parry
-					ProcessHitEventForParry(targetActor,causeActor);
-				}
-				recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 			}
+
+			bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
+            bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
+
+			if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
+
+                float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
+
+                //Incoming spells while warding do not injure
+                if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
+					auto injuryManager = InjuryApplicationManager::GetSingleton();
+                    injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);
+                }
+			}
+
+			auto leftHand = targetActor->GetEquippedObject(true);
+
+			bool blockedMeleeHit = false;
+			if (!a_event->projectile && 
+				((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
+				isBlocking) {
+				blockedMeleeHit = true;
+			}
+				
+			//Shield Stagger
+			if (leftHand && leftHand->IsArmor() && blockedMeleeHit){
+				ProcessHitEventForBlockStagger(targetActor, causeActor);
+			} else if (blockedMeleeHit) {
+				//Parry
+				ProcessHitEventForParry(targetActor,causeActor);
+			}
+			recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 		}
 		return RE::BSEventNotifyControl::kContinue;
 	}
