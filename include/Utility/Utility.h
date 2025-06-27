@@ -78,7 +78,7 @@ namespace Utility
 
     static inline bool IsPowerAttacking(RE::Actor* actor) {
         if (auto high = actor->GetHighProcess()) {
-            if (const auto attackData = high->attackData) {
+            if (const auto &attackData = high->attackData) {
                 auto flags = attackData->data.flags;
 
                 if (flags && flags.any(RE::AttackData::AttackFlag::kPowerAttack)) {
