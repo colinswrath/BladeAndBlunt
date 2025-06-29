@@ -181,7 +181,9 @@ void Settings::LoadForms()
     DualWieldReplaceKeyword = LoadFormPointerFromIni<RE::BGSKeyword>(dualWieldKeywordFormId, "Update.esm");
 
 	//Hardcoded loads
-	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
+    MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
+
+    BlockStaminaPerk25 = dataHandler->LookupForm(RE::FormID(0xADA513), "Update.esm")->As<RE::BGSPerk>();
 
 	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
@@ -201,6 +203,9 @@ void Settings::LoadForms()
 
 	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
 	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
+
+    MAG_BlockCostGlobal = dataHandler->LookupForm(RE::FormID(0xADA618), "Update.esm")->As<RE::TESGlobal>();
+    MAG_BashCostGlobal  = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
 	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();

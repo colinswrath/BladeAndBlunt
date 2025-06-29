@@ -38,8 +38,12 @@ public:
 	
 	RE::BGSPerk* BashStaminaPerk;
     RE::BGSPerk* BashStaminaPerk25;
-	RE::BGSPerk* BlockStaminaPerk;
+    RE::BGSPerk* BlockStaminaPerk;
+    RE::BGSPerk* BlockStaminaPerk25;
 	RE::BGSPerk* BlockStaggerPerk;
+
+    RE::TESGlobal* MAG_BlockCostGlobal;
+    RE::TESGlobal* MAG_BashCostGlobal;
 
 	RE::TESGlobal* InjuryChance90Health;
     RE::TESGlobal* InjuryChance50Health;

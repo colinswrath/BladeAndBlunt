@@ -73,7 +73,7 @@ public:
                 float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
 
                 //Incoming spells while warding do not injure
-                if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
+                if (!isWarding || !isBlocking || !(spellItem && spellItem->hostileCount > 0)) {
 					auto injuryManager = InjuryApplicationManager::GetSingleton();
                     injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);                   
                 }
@@ -199,7 +199,7 @@ public:
 private:
 
 
-    inline static RE::BSEventNotifyControl ProcessEvent_PC(RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
+    inline static RE::BSEventNotifyControl ProcessEvent_PC([[maybe_unused]] RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
                                                             RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource)
     {
         ProcessCharacterEvent(a_sink, a_event, a_eventSource);
@@ -215,7 +215,7 @@ private:
         }
     }
 
-    static void ProcessCharacterEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
+    static void ProcessCharacterEvent([[maybe_unused]] RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
                                               [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource)
     {
         if (!a_event->holder) {

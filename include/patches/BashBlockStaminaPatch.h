@@ -2,6 +2,7 @@
 
 namespace BashBlockStaminaPatch
 {
+    //Block
 	float GetStaminaDamage(RE::HitData* a_hitData)
 	{
 		if (!a_hitData) {
@@ -12,15 +13,26 @@ namespace BashBlockStaminaPatch
 		auto stamBlockDmgMult = RE::GameSettingCollection::GetSingleton()->GetSetting("fStaminaBlockDmgMult")->GetFloat();
 		auto stamBlockBaseDmg = RE::GameSettingCollection::GetSingleton()->GetSetting("fStaminaBlockBase")->GetFloat();
 
-		float perkMult = 1.0f;
+        auto settings = Settings::GetSingleton();
+		float perkMult      = 1.0f;
+        float globalMult    = 1.0f;
 		if (a_hitData->target) {
 			auto actorPtr = a_hitData->target.get();
-
-            auto leftHand = actorPtr->GetEquippedObject(true);       
-			auto perk = Settings::GetSingleton()->BlockStaminaPerk;
-            if (perk && leftHand && leftHand->IsArmor() && actorPtr->HasPerk(Settings::GetSingleton()->BlockStaminaPerk)) {
+      
+			auto perk50   = settings->BlockStaminaPerk;
+            auto perk25   = settings->BlockStaminaPerk25;
+            if (perk50 && actorPtr->HasPerk(perk50)) {
 				perkMult = 0.5f;
-			}
+            }
+            else if (perk25 && actorPtr->HasPerk(perk25))
+            {
+                perkMult = 0.75f;
+            }
+
+            if (actorPtr->IsPlayerRef())
+            {
+                globalMult = settings->MAG_BlockCostGlobal->value;
+            }
 		}
 
 		auto actualDmg = a_hitData->percentBlocked * a_hitData->physicalDamage;
@@ -28,11 +40,12 @@ namespace BashBlockStaminaPatch
 		//NOTE: hitdata->stagger must be a float. Clib has it set to uint32_t which will mess things up. I changed it locally, but will need a PR to po3 clib
 		auto stagger = a_hitData->stagger * staggerMult;
 		auto damagScaleStam = actualDmg * stamBlockDmgMult;
-		auto result = (stagger + stamBlockBaseDmg + damagScaleStam) * perkMult;
+		auto result = (stagger + stamBlockBaseDmg + damagScaleStam) * perkMult * globalMult;
 
 		return result;
 	}
 
+    //Bash
 	float GetAttackStamina(RE::ActorValueOwner* a_avOwner, RE::BGSAttackData* a_attackData)
 	{
 		if (!a_attackData || !a_avOwner) {
@@ -51,9 +64,10 @@ namespace BashBlockStaminaPatch
 
 			auto bashAttackStamina = powerAttack ? staminaPowerBashBase->GetFloat() : staminaBashBase->GetFloat();
 
+            auto settings = Settings::GetSingleton();
 			float playerBashPerkMult = 1.0f;
+            float globalMult         = 1.0f;
 			if (actor && actor->IsPlayerRef()) {
-                auto settings = Settings::GetSingleton();
                 auto perk     = settings->BashStaminaPerk;
                 auto perk25   = settings->BashStaminaPerk25;
 				if (perk && actor->HasPerk(perk)) {
@@ -61,9 +75,11 @@ namespace BashBlockStaminaPatch
                 } else if (perk25 && actor->HasPerk(perk25)) {
                     playerBashPerkMult = 0.75f;
                 }
+
+                globalMult = settings->MAG_BashCostGlobal->value;
 			}
 
-			return (bashAttackStamina * a_attackData->data.staminaMult) * playerBashPerkMult;
+			return (bashAttackStamina * a_attackData->data.staminaMult) * playerBashPerkMult * globalMult;
 		} else {
 			if (!powerAttack) {
 				return 0.0F;
