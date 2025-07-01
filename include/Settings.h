@@ -38,7 +38,7 @@ public:
 	
 	RE::BGSPerk* BashStaminaPerk;
     RE::BGSPerk* BashStaminaPerk25;
-    RE::BGSPerk* BlockStaminaPerk;
+	RE::BGSPerk* BlockStaminaPerk;
     RE::BGSPerk* BlockStaminaPerk25;
 	RE::BGSPerk* BlockStaggerPerk;
 
@@ -67,6 +67,10 @@ public:
     RE::StaggerEffect* stagger;
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+
+    std::string staggerAV_str;
+    std::string staggerBarColor;
+    std::string staggerFlashColor;
 
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;
