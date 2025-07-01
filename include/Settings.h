@@ -23,7 +23,7 @@ public:
 	RE::SpellItem* MAGParryStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
-	RE::SpellItem* MAGParryControllerSpell;
+    RE::SpellItem* MAGParryControllerSpell;
 	RE::SpellItem* MAGCrossbowStaminaDrainSpell;
 
 	RE::SpellItem* InjurySpell1;
@@ -38,7 +38,7 @@ public:
 	
 	RE::BGSPerk* BashStaminaPerk;
     RE::BGSPerk* BashStaminaPerk25;
-	RE::BGSPerk* BlockStaminaPerk;
+    RE::BGSPerk* BlockStaminaPerk;
     RE::BGSPerk* BlockStaminaPerk25;
 	RE::BGSPerk* BlockStaggerPerk;
 
