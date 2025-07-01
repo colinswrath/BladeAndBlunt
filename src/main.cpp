@@ -41,14 +41,26 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			logger::info("Bash hook installed");
 		}
 
+        if (!Hooks::InstallTrueHUDHook()) {
+            logger::warn("Failed to obtain TrueHUD API");
+        } else {
+            logger::info("Obtained TrueHUD API");
+        }
+
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		if (settings) {
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();
 			settings->ReplacePowerAttackKeywords();
-		}
 
+            if (!Hooks::InstallStaggerHUDHook()) {
+                logger::warn("Stagger HUD installation failed.");
+            }
+            else {
+                logger::info("Stagger HUD installed");
+            }
+		}
         OnHitEventHandler::Register();
 
 		break;

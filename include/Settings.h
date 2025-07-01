@@ -23,7 +23,7 @@ public:
 	RE::SpellItem* MAGParryStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
-	RE::SpellItem* MAGParryControllerSpell;
+    RE::SpellItem* MAGParryControllerSpell;
 	RE::SpellItem* MAGCrossbowStaminaDrainSpell;
 
 	RE::SpellItem* InjurySpell1;
@@ -67,6 +67,10 @@ public:
     RE::StaggerEffect* stagger;
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+
+    std::string staggerAV_str;
+    std::string staggerBarColor;
+    std::string staggerFlashColor;
 
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;

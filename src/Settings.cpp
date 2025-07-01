@@ -180,8 +180,12 @@ void Settings::LoadForms()
     std::string dualWieldKeywordFormId((ini.GetValue("", "DualWieldReplacementKeyword", "")));
     DualWieldReplaceKeyword = LoadFormPointerFromIni<RE::BGSKeyword>(dualWieldKeywordFormId, "Update.esm");
 
+    staggerAV_str = ini.GetValue("", "StaggerBarAV", "");
+    staggerBarColor = ini.GetValue("", "StaggerBarColor", "");
+    staggerFlashColor = ini.GetValue("", "StaggerFlashColor", "");
+
 	//Hardcoded loads
-    MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
+	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
 
     BlockStaminaPerk25 = dataHandler->LookupForm(RE::FormID(0xADA513), "Update.esm")->As<RE::BGSPerk>();
 
