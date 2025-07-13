@@ -28,18 +28,20 @@ namespace StaggerHUD
                 if (auto a_actorHandle = a_actor->GetHandle()) {
                     auto         staggerAV_val = Hooks::GetActorValueIDFromName(settings->staggerAV_str.data());
                     auto         staggerAV     = a_avOwner->GetActorValue(staggerAV_val);
-                    unsigned int staggerBarColor;
-                    unsigned int staggerFlashColor;
 
-                    std::istringstream sbc { settings->staggerBarColor };
-                    sbc >> std::hex >> staggerBarColor;
-                    std::istringstream sfc{ settings->staggerFlashColor };
-                    sfc >> std::hex >> staggerFlashColor;
+                    if (staggerAV > 0)
+                    {
+                        unsigned int staggerBarColor;
+                        unsigned int staggerFlashColor;
+                        std::istringstream sbc { settings->staggerBarColor };
+                        sbc >> std::hex >> staggerBarColor;
+                        std::istringstream sfc{ settings->staggerFlashColor };
+                        sfc >> std::hex >> staggerFlashColor;
 
-                    StaggerAVHUD->trueHUDInterface->OverrideSpecialBarColor(a_actorHandle, TRUEHUD_API::BarColorType::BarColor, staggerBarColor);
-                    StaggerAVHUD->trueHUDInterface->OverrideSpecialBarColor(a_actorHandle, TRUEHUD_API::BarColorType::FlashColor, staggerFlashColor);
-                    logger::info("{}: {}", settings->staggerAV_str, staggerAV);
-                    return GetMaxStagger(a_actor) + staggerAV + FLT_MIN;
+                        StaggerAVHUD->trueHUDInterface->OverrideSpecialBarColor(a_actorHandle, TRUEHUD_API::BarColorType::BarColor, staggerBarColor);
+                        StaggerAVHUD->trueHUDInterface->OverrideSpecialBarColor(a_actorHandle, TRUEHUD_API::BarColorType::FlashColor, staggerFlashColor);
+                    }
+                    return staggerAV;
                 }
             }
         }
