@@ -9,18 +9,11 @@ namespace Hooks
 	inline static REL::Relocation<std::uintptr_t> Block_GameSetting_Hook{ REL::RelocationID(42842,44014), REL::Relocate(0x452,0x438) };
 	inline static REL::Relocation<std::uintptr_t> fBlock_GameSetting{ REL::RelocationID(505023,374158), 0x8 };
 	inline static REL::Relocation<std::uintptr_t> SpellCap_Hook{ REL::RelocationID(37792,38741), REL::Relocate(0x53,0x55) };
+    inline static REL::Relocation<std::uintptr_t> actorUpdate{ REL::RelocationID(36357, 37348), REL::Relocate(0x6D3, 0x674) };
 	inline REL::Relocation<uintptr_t> arrow_release_handler{ REL::RelocationID(41778, 42859), REL::Relocate(0x133, 0x138) };
 	static REL::Relocation<std::uintptr_t> armorRating1(REL::RelocationID(42842, 44014));
 	static REL::Relocation<std::uintptr_t> armorRating2(REL::RelocationID(37605, 38558));
     static REL::Relocation<std::uintptr_t> staggerHook(REL::RelocationID(34188, 34982), 0x61);
-
-    inline RE::ActorValue GetActorValueIDFromName(const char* av_name)
-    {
-        // SE: 0x3E1450, AE: 0x3FC5A0, VR: ---
-        using func_t = decltype(&GetActorValueIDFromName);
-        REL::Relocation<func_t> func{ REL::RelocationID(26570, 27203) };
-        return func(av_name);
-    }
 
     bool InstallHooks();
     bool InstallBashMultHook();

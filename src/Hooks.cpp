@@ -1,9 +1,9 @@
 #include "Managers/UpdateManager.h"
+#include "Managers/StaggerHUDManager.h"
 #include "patches/ArmorRatingScaling.h"
 #include "patches/BashBlockStaminaPatch.h"
 #include "Events.h"
 #include "patches/MiscPatches.h"
-#include "patches/StaggerHUD.h"
 
 namespace Hooks
 {
@@ -44,11 +44,11 @@ namespace Hooks
 
     bool InstallTrueHUDHook()
     {
-        return StaggerHUD::InstallTrueHUDHook();
+        return StaggerHUDManager::InstallTrueHUDHook();
     }
 
     bool InstallStaggerHUDHook()
     {
-        return StaggerHUD::RequestStaggerBarControl();
+        return StaggerHUDManager::InstallStaggerHUDHook();
     }
 }
