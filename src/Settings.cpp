@@ -44,7 +44,7 @@ void Settings::AdjustWeaponStaggerVals()
 {
 	if (zeroAllWeapStagger) {
 		logger::info("Adjusting weapon stagger values");
-		int16_t totalWeaps = 0;
+		int totalWeaps = 0;
 
 		auto dataHandler = RE::TESDataHandler::GetSingleton();
 		if (dataHandler) {

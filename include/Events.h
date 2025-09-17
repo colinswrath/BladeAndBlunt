@@ -66,8 +66,10 @@ public:
 
 			bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
             bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
+            bool isEthereal = targetActor->AsMagicTarget()->HasEffectWithArchetype(RE::EffectSetting::Archetype::kEtherealize);
 
-			if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
+			if (((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) &&
+                !isEthereal) {
 
                 float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
 

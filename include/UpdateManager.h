@@ -26,6 +26,7 @@ private:
 	inline static std::int32_t OnFrameUpdate(std::int64_t a1)
 	{
 		auto settings = Settings::GetSingleton();
+        bool paused   = Cache::GetUISingleton()->GameIsPaused();
             
 		if (UpdateManager::frameCount > settings->maxFrameCheck) {
 			UpdateManager::frameCount = 0;
@@ -35,34 +36,9 @@ private:
 
             if (player->IsGodMode())
             {
-                if (settings->IsCastingSpell)
-                    player->RemoveSpell(settings->IsCastingSpell);
-
-                if (settings->BowStaminaSpell)
-                    player->RemoveSpell(settings->BowStaminaSpell);
-
-                if (settings->IsAttackingSpell)
-                    player->RemoveSpell(settings->IsAttackingSpell);
-
-                if (settings->XbowStaminaSpell)
-                    player->RemoveSpell(settings->XbowStaminaSpell);
-
-                if (settings->IsAttackingSpell)
-                    player->RemoveSpell(settings->IsAttackingSpell);
-
-                if (settings->IsBlockingSpell)
-                    player->RemoveSpell(settings->IsBlockingSpell);
-
-                if (settings->IsSneakingSpell)
-                    player->RemoveSpell(settings->IsSneakingSpell);
-
-                if (settings->IsSprintingSpell)
-                    player->RemoveSpell(settings->IsSprintingSpell);
-
-                if (settings->IsSwimmingSpell)
-                    player->RemoveSpell(settings->IsSwimmingSpell);
+                HandleGodMode(player, settings);
             }
-            else {
+            else if (!paused) {
 			    switch (UpdateManager::frameCount) {
 			    case 1:
 				    if (player->IsCasting(nullptr)) {
@@ -146,26 +122,7 @@ private:
 
 				    break;
 			    case 6:
-				    {
-                        RE::ActorPtr actorCheck = nullptr;
-                        bool isMounted = player->GetMount(actorCheck);
-                        auto state = isMounted ? actorCheck->AsActorState() : player->AsActorState();
-
-					    if (state->IsSprinting()) {
-						    if (!HasSpell(player, settings->IsSprintingSpell))
-							    player->AddSpell(settings->IsSprintingSpell);
-                            if (isMounted) {
-                                actorCheck->AddSpell(settings->MountSprintingSpell);
-                            }
-
-					    } else if (HasSpell(player, settings->IsSprintingSpell)) {
-						    player->RemoveSpell(settings->IsSprintingSpell);
-
-						    if (actorCheck) {
-                                actorCheck->RemoveSpell(settings->MountSprintingSpell);
-						    }
-					    }
-				    }
+                    HandleSprinting(player, settings);
 				    break;
 			    default:
 				    break;
@@ -173,7 +130,7 @@ private:
             }
 		}
 
-        if (!Cache::GetUISingleton()->GameIsPaused()) {
+        if (!paused) {
 
 		    if (Cache::g_deltaTime > 0) {
 			    lastTime += Cache::g_deltaTime;
@@ -257,4 +214,55 @@ private:
 		}
 		return false;
 	}
+
+    static void HandleSprinting(RE::Actor* player, Settings* settings)
+    {
+        RE::ActorPtr actorCheck = nullptr;
+        bool         isMounted  = player->GetMount(actorCheck);
+        auto         state      = isMounted ? actorCheck->AsActorState() : player->AsActorState();
+
+        if (state->IsSprinting()) {
+            if (!HasSpell(player, settings->IsSprintingSpell))
+                player->AddSpell(settings->IsSprintingSpell);
+            if (isMounted && actorCheck) {
+                actorCheck->AddSpell(settings->MountSprintingSpell);
+            }
+        }
+        else if (HasSpell(player, settings->IsSprintingSpell)) {
+            player->RemoveSpell(settings->IsSprintingSpell);
+            if (actorCheck) {
+                actorCheck->RemoveSpell(settings->MountSprintingSpell);
+            }
+        }
+    }
+
+    static void HandleGodMode(RE::Actor* player, Settings* settings)
+    {
+        if (settings->IsCastingSpell)
+            player->RemoveSpell(settings->IsCastingSpell);
+
+        if (settings->BowStaminaSpell)
+            player->RemoveSpell(settings->BowStaminaSpell);
+
+        if (settings->IsAttackingSpell)
+            player->RemoveSpell(settings->IsAttackingSpell);
+
+        if (settings->XbowStaminaSpell)
+            player->RemoveSpell(settings->XbowStaminaSpell);
+
+        if (settings->IsAttackingSpell)
+            player->RemoveSpell(settings->IsAttackingSpell);
+
+        if (settings->IsBlockingSpell)
+            player->RemoveSpell(settings->IsBlockingSpell);
+
+        if (settings->IsSneakingSpell)
+            player->RemoveSpell(settings->IsSneakingSpell);
+
+        if (settings->IsSprintingSpell)
+            player->RemoveSpell(settings->IsSprintingSpell);
+
+        if (settings->IsSwimmingSpell)
+            player->RemoveSpell(settings->IsSwimmingSpell);
+    }
 };
