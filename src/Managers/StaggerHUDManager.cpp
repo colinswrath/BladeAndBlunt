@@ -21,7 +21,7 @@ float StaggerHUDBase::GetCurrentStaggerCooldown(RE::Actor* a_actor)
         if (auto a_avOwner = a_actor->AsActorValueOwner()) {
             auto staggerAV_val = StaggerHUDManager::GetActorValueIDFromName(settings->staggerAV_str.data());
             auto staggerAV = a_avOwner->GetActorValue(staggerAV_val);
-            return staggerAV + FLT_MIN;
+            return staggerAV;
         }
     }
     return 0.0f;

@@ -223,7 +223,7 @@ void PlayerFrameStateHandler::HandleIsSprintingState()
     auto         state      = isMounted ? actorCheck->AsActorState() : player->AsActorState();
 
     if (state->IsSprinting()) {
-        if (isMounted) {
+        if (isMounted && actorCheck && !actorCheck->HasSpell(settings->MountSprintingSpell)) {
             actorCheck->AddSpell(settings->MountSprintingSpell);
         }
         else {

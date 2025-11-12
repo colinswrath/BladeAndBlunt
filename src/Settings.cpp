@@ -40,7 +40,7 @@ void Settings::AdjustWeaponStaggerVals()
 {
 	if (zeroAllWeapStagger) {
 		logger::info("Adjusting weapon stagger values");
-		int16_t totalWeaps = 0;
+		int totalWeaps = 0;
 
 		auto dataHandler = RE::TESDataHandler::GetSingleton();
 		if (dataHandler) {
@@ -69,9 +69,9 @@ void Settings::ReplacePowerAttackKeywords()
 		auto targetEvent = std::string("PowerAttackTypeStanding");
 
 		auto dataHandler = RE::TESDataHandler::GetSingleton();
-		auto races = dataHandler->GetFormArray<RE::TESRace>();
+		auto& races = dataHandler->GetFormArray<RE::TESRace>();
 
-		for (auto raceCandidate : races) {
+		for (auto* raceCandidate : races) {
             if (raceCandidate->IsDeleted()) {
                 continue;
             }
@@ -170,7 +170,10 @@ void Settings::LoadForms()
 
     std::string bashPerk25FormId((ini.GetValue("", "BashStaminaPerk25FormId", "")));
     BashStaminaPerk25 = LoadFormPointerFromIni<RE::BGSPerk>(bashPerk25FormId, "Update.esm");
-    
+
+    std::string blockPerk25FormId((ini.GetValue("", "BlockStaminaPerk25FormId", "")));
+    BlockStaminaPerk25 = LoadFormPointerFromIni<RE::BGSPerk>(blockPerk25FormId, "Update.esm");
+
     std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
     BlockStaminaPerk = LoadFormPointerFromIni<RE::BGSPerk>(blockPerkFormId, "Update.esm");
 
@@ -197,8 +200,6 @@ void Settings::LoadForms()
 
     //Hardcoded loads
 	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
-
-    BlockStaminaPerk25 = dataHandler->LookupForm(RE::FormID(0xADA513), "Update.esm")->As<RE::BGSPerk>();
 
 	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
