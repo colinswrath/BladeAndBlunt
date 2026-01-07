@@ -1,5 +1,7 @@
 #pragma once
 
+#include "API/SMI_API.h"
+
 class Settings
 {
 public:
@@ -109,5 +111,19 @@ public:
             return nullptr;
         }
         
+    }
+
+    void ToggleSMIFromBnB()
+    {
+        logger::info("Requesting SMI API");
+        auto* handle = SMI_API::RequestPluginAPI();
+        if (!handle)
+        {
+            logger::info("SMI API not found");
+            return;
+        }
+        logger::info("SMI detected. Relinquishing healthbar control");
+        auto smi             = static_cast<SMI_API::IVSmi1*>(handle);
+        smi->SetInjuryHandlingEnabled(true);
     }
 };

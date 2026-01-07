@@ -47,6 +47,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();
 			settings->ReplacePowerAttackKeywords();
+            settings->ToggleSMIFromBnB();
 		}
 
         OnHitEventHandler::Register();
@@ -93,9 +94,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
 	if (auto serialization = SKSE::GetSerializationInterface()) {
 		serialization->SetUniqueID(Serialization::ID);
-		serialization->SetSaveCallback(&Serialization::SaveCallback);
 		serialization->SetLoadCallback(&Serialization::LoadCallback);
-		serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 
 	logger::info("Blade and Blunt loaded.");

@@ -130,19 +130,6 @@ private:
             }
 		}
 
-        if (!paused) {
-
-		    if (Cache::g_deltaTime > 0) {
-			    lastTime += Cache::g_deltaTime;
-			    if (lastTime >= settings->injuryUpdateFrequency) {
-				    auto inj = InjuryPenaltyHandler::GetSingleton();
-				    inj->CheckInjuryAvPenalty();
-				    lastTime = 0;
-			    }
-		    }
-        }
-
- 
 		UpdateManager::frameCount++;
 		return _OnFrameFunction(a1);
 	}

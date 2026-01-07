@@ -17,7 +17,7 @@ public:
 	void CheckInjuryAvPenalty()
 	{
 		auto settings = Settings::GetSingleton();
-		if ((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
+        if ((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
 			(settings->SMOnlyEnableInjuries && settings->enableInjuries && Conditions::IsSurvivalEnabled())) {
 			auto player = Cache::GetPlayerSingleton();
 
