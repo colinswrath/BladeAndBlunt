@@ -205,7 +205,7 @@ private:
         }
     }
 
-    static void ProcessCharacterEvent(RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
+    static void ProcessCharacterEvent([[maybe_unused]] RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
                                       [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource)
     {
         if (!a_event->holder) {

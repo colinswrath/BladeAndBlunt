@@ -3,6 +3,7 @@
 #include "patches/BashBlockStaminaPatch.h"
 #include "Events.h"
 #include "patches/MiscPatches.h"
+#include "Hud/StaggerHUDManager.h"
 
 namespace Hooks
 {
@@ -36,6 +37,11 @@ namespace Hooks
 
 		return true;
 	}
+
+    bool InstallStaggerHUDHook()
+    {
+        return StaggerHUDManager::InstallStaggerHUDHook();
+    }
 
 	bool InstallBashMultHook() 
 	{

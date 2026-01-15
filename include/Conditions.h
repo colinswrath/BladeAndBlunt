@@ -97,25 +97,6 @@ namespace Conditions
 		       player->AsActorValueOwner()->GetPermanentActorValue(RE::ActorValue::kHealth);
 	}
 
-    static bool PlayerHasEtherealEffect()
-    {
-        auto player = RE::PlayerCharacter::GetSingleton();
-
-        auto               activeEffects = player->AsMagicTarget()->GetActiveEffectList();
-        RE::EffectSetting* setting       = nullptr;
-        for (auto& effect : *activeEffects) {
-            setting = effect ? effect->GetBaseObject() : nullptr;
-            if (setting) {
-                if (setting->data.archetype == RE::EffectSetting::Archetype::kEtherealize)
-                {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
 	//Credit: KernalsEgg for ApplySpell and IsPermanent
 	//extensions
 	static bool IsPermanent(RE::MagicItem* item)

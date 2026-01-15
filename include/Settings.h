@@ -7,6 +7,7 @@ class Settings
 public:
 	static Settings* GetSingleton();
 
+    void LoadStaggerBarHudSettings(CSimpleIniA ini);
 	void LoadSettings();
 	void LoadForms();
 	void AdjustWeaponStaggerVals();
@@ -54,6 +55,10 @@ public:
 	RE::EffectSetting* MAG_InjuryCooldown2;
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+
+    std::string staggerAV_str;
+    std::string staggerBarColor;
+    std::string staggerFlashColor;
 
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;

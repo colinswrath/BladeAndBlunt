@@ -116,6 +116,21 @@ void Settings::LoadForms()
     ini.SetUnicode();
     ini.LoadFile(R"(.\Data\SKSE\Plugins\BladeAndBlunt.ini)");
 
+    // StaggerHUD
+    CSimpleIniA trueHUDini;
+    trueHUDini.SetUnicode();
+    trueHUDini.LoadFile(R"(.\Data\MCM\Settings\TrueHUD.ini)");
+
+    staggerAV_str   = ini.GetValue("", "StaggerBarAV", "");
+    staggerBarColor = trueHUDini.GetValue("Colors", "sSpecialColor", "");
+    if (staggerBarColor == "") {
+        staggerBarColor = ini.GetValue("", "StaggerBarColor", "");
+    }
+    staggerFlashColor = trueHUDini.GetValue("Colors", "sSpecialFlashColor", "");
+    if (staggerFlashColor == "") {
+        staggerFlashColor = ini.GetValue("", "StaggerFlashColor", "");
+    }
+
     //BnB esp forms
     std::string attackingSpellFormID((ini.GetValue("", "IsAttackingSpellFormId", "")));
     IsAttackingSpell = LoadFormPointerFromIni<RE::SpellItem>(attackingSpellFormID, FileName);
@@ -233,4 +248,3 @@ void Settings::SetGlobalsAndGameSettings()
 		maxRatingSetting->data.f = 75.0f;
 	}
 }
-

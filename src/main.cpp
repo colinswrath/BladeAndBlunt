@@ -2,6 +2,7 @@
 #include "Cache.h"
 #include "Events.h"
 #include "Serialization.h"
+#include "Hud/StaggerHUDManager.h"
 
 void InitLogger()
 {
@@ -41,6 +42,13 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			logger::info("Bash hook installed");
 		}
 
+        if (!StaggerHUDManager::InstallTrueHUD()) {
+            logger::warn("True HUD installation failed.");
+        }
+        else {
+            logger::info("True HUD installed");
+        }
+
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		if (settings) {
@@ -51,6 +59,13 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 		}
 
         OnHitEventHandler::Register();
+
+        if (!Hooks::InstallStaggerHUDHook()) {
+            logger::warn("Stagger HUD installation failed.");
+        }
+        else {
+            logger::info("Stagger HUD installed");
+        }
 
 		break;
 	}
