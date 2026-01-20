@@ -55,6 +55,7 @@ public:
 	RE::EffectSetting* MAG_InjuryCooldown2;
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+    RE::BGSKeyword* MagicWard;
 
     std::string staggerAV_str;
     std::string staggerBarColor;

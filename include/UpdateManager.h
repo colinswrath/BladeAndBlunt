@@ -68,7 +68,7 @@ private:
 				    }
 				    break;
 			    case 4:
-				    if (IsAttacking(player)) {
+				    if (player->IsAttacking()) {
 					    if (!HasSpell(player, settings->IsAttackingSpell)) {
 						    player->AddSpell(settings->IsAttackingSpell);
 					    }
@@ -85,7 +85,7 @@ private:
                             Conditions::ApplySpell(player, player, settings->PowerAttackStopSpell);
                         }
 
-					    if (IsBlocking(player)) {
+					    if (player->IsBlocking()) {
 						    auto leftHand = player->GetEquippedObject(true);
 						    //Parry setup
 						    if ((!leftHand || leftHand->IsWeapon()) && !settings->IsBlockingWeaponSpellCasted) {
@@ -105,14 +105,14 @@ private:
 				    }
 				    break;
 			    case 5:
-				    if (player->IsSneaking() && IsMoving(player)) {
+				    if (player->IsSneaking() && player->IsMoving()) {
 					    if (!HasSpell(player, settings->IsSneakingSpell) && settings->enableSneakStaminaCost)
 						    player->AddSpell(settings->IsSneakingSpell);
 				    } else if (HasSpell(player, settings->IsSneakingSpell)) {
 					    player->RemoveSpell(settings->IsSneakingSpell);
 				    }
 
-                    if (player->AsActorState()->IsSwimming() && IsMoving(player)) {
+                    if (player->AsActorState()->IsSwimming() && player->IsMoving()) {
                         if (!HasSpell(player, settings->IsSwimmingSpell))
                             player->AddSpell(settings->IsSwimmingSpell);
                     }

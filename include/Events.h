@@ -34,6 +34,7 @@ public:
 	
 		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto applicationRuntime = GetDurationOfApplicationRunTime();
+            auto settings           = Settings::GetSingleton();
 
 			if (ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime)) {
                 return RE::BSEventNotifyControl::kContinue;
@@ -65,7 +66,9 @@ public:
 			}
 
 			bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
-            bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
+
+            bool isWarding = PlayerHasActiveMagicEffectWithKeyword(settings->MagicWard);    
+
             bool isEthereal = targetActor->AsMagicTarget()->HasEffectWithArchetype(RE::EffectSetting::Archetype::kEtherealize);
 
 			if (((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) &&

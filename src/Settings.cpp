@@ -210,7 +210,8 @@ void Settings::LoadForms()
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
 	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
 	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
-	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    HealthPenaltyUIGlobal      = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    MagicWard      = dataHandler->LookupForm(RE::FormID(0x1EA69), "Skyrim.esm")->As<RE::BGSKeyword>();
 
 	auto smGlobal = dataHandler->LookupForm(RE::FormID(0x826), "ccqdrsse001-survivalmode.esl");
 

@@ -5,23 +5,6 @@
 //Originally intended to just implement some condition functions but iv been placing extensions/utility here as well
 namespace Conditions
 { 
-	static bool IsAttacking(RE::Actor* actor)
-	{
-		using func_t = decltype(&Conditions::IsAttacking);
-		REL::Relocation<func_t> func{ Cache::IsAttackingAddress };
-		return func(actor);
-	}
-
-	inline static REL::Relocation<decltype(IsAttacking)> _IsAttacking;
-
-	static bool IsBlocking(RE::Actor* actor)
-	{
-		using func_t = decltype(&Conditions::IsBlocking);
-		REL::Relocation<func_t> func{ Cache::IsBlockingAddress };
-		return func(actor);
-	}
-
-	inline static REL::Relocation<decltype(IsBlocking)> _IsBlocking;
 
 	static bool HasSpell(RE::Actor* actor, RE::SpellItem* spell)
 	{	
@@ -33,14 +16,7 @@ namespace Conditions
 	}
 	inline static REL::Relocation<decltype(HasSpell)> _HasSpell;
 
-
-	static bool IsMoving(RE::PlayerCharacter* player)
-	{
-		auto playerState = player->AsActorState();
-		return (static_cast<bool>(playerState->actorState1.movingForward) || static_cast<bool>(playerState->actorState1.movingBack) || static_cast<bool>(playerState->actorState1.movingLeft) || static_cast<bool>(playerState->actorState1.movingRight));
-	}
-
-	static RE::TESObjectWEAP* GetUnarmedWeapon()
+	static inline RE::TESObjectWEAP* GetUnarmedWeapon()
 	{
 		auto** singleton{ reinterpret_cast<RE::TESObjectWEAP**>(Cache::getUnarmedWeaponAddress) };
 		return *singleton;
@@ -62,6 +38,24 @@ namespace Conditions
 		}
 		return false;
 	}
+
+    inline static bool PlayerHasActiveMagicEffectWithKeyword(RE::BGSKeyword* keyword)
+    {
+        auto player = RE::PlayerCharacter::GetSingleton();
+
+        auto               activeEffects = player->AsMagicTarget()->GetActiveEffectList();
+        RE::EffectSetting* setting       = nullptr;
+        for (auto& effect : *activeEffects) {
+            setting = effect ? effect->GetBaseObject() : nullptr;
+            if (setting) {
+                if ((setting->HasKeywordID(keyword->GetFormID())))
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 
 	static bool IsSurvivalEnabled() {
 		auto settings = Settings::GetSingleton();
