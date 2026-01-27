@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/SMI_API.h"
+
 class Settings
 {
 public:
@@ -31,10 +33,6 @@ public:
     RE::SpellItem* InjurySpell3;
     RE::SpellItem* jumpSpell;
     RE::SpellItem* PowerAttackStopSpell;
-
-    RE::SpellItem* MAG_ChargedShotSpell01;
-    RE::SpellItem* MAG_ChargedShotSpell02;
-    RE::SpellItem* MAG_ChargedShotSpell03;
 	
 	RE::BGSPerk* BashStaminaPerk;
     RE::BGSPerk* BashStaminaPerk25;
@@ -52,9 +50,6 @@ public:
     RE::TESGlobal* MAG_InjuriesSMOnly;
     RE::TESGlobal* MAG_DifficultyGlobal;
 
-    RE::TESGlobal* MAG_ChargedShotTimer01;
-    RE::TESGlobal* MAG_ChargedShotTimer02;
-
 	RE::TESGlobal* MAG_levelBasedDifficulty;
 	RE::TESGlobal* MAG_InjuryAndRest;
 	RE::TESGlobal* HealthPenaltyUIGlobal;
@@ -67,6 +62,7 @@ public:
     RE::StaggerEffect* stagger;
 
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+    RE::BGSKeyword* MagicWard;
 
     std::string staggerAV_str;
     std::string staggerBarColor;
@@ -79,7 +75,6 @@ public:
 	bool replaceAttackTypeKeywords;
 	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
-	bool starfrostInstalled;
 
     bool wasPowerAttacking=false;
 	
@@ -130,5 +125,18 @@ public:
             return nullptr;
         }
         
+    }
+
+    void ToggleSMIFromBnB()
+    {
+        logger::info("Requesting SMI API");
+        auto* handle = SMI_API::RequestPluginAPI();
+        if (!handle) {
+            logger::info("SMI API not found");
+            return;
+        }
+        logger::info("SMI detected. Relinquishing healthbar control");
+        auto smi = static_cast<SMI_API::IVSmi1*>(handle);
+        smi->SetInjuryHandlingEnabled(true);
     }
 };

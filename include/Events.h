@@ -35,6 +35,7 @@ public:
 	
 		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto applicationRuntime = GetDurationOfApplicationRunTime();
+            auto settings           = Settings::GetSingleton();
 
 			if (ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime)) {
                 return RE::BSEventNotifyControl::kContinue;
@@ -66,7 +67,7 @@ public:
 			}
 
 			bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
-            bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
+            bool isWarding  = PlayerHasActiveMagicEffectWithKeyword(settings->MagicWard);
             bool isEthereal = targetActor->AsMagicTarget()->HasEffectWithArchetype(RE::EffectSetting::Archetype::kEtherealize);
 
             if (((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) && !isEthereal) {
@@ -74,7 +75,7 @@ public:
                 float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
 
                 //Incoming spells while warding do not injure
-                if (!isWarding || !isBlocking || !(spellItem && spellItem->hostileCount > 0)) {
+                if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
 					auto injuryManager = InjuryApplicationManager::GetSingleton();
                     injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);                   
                 }
@@ -169,17 +170,6 @@ public:
 
 		if (source->IsPlayerRef() && (a_weapon->IsCrossbow() || a_weapon->IsBow())) {
 			Utility::ApplySpell(source, source,Settings::GetSingleton()->MAGCrossbowStaminaDrainSpell);
-            RE::BSTSmartPointer<RE::BSAnimationGraphManager> manager;
-
-            auto playerCamera = RE::PlayerCamera::GetSingleton();
-
-            if (playerCamera->bowZoomedIn) {
-                TaskManager::GetSingleton().AddTask(
-                    [source]() {
-                    source->NotifyAnimationGraph("attackStop");
-                },
-                std::chrono::milliseconds(500));
-            }
 		}
 
 	}

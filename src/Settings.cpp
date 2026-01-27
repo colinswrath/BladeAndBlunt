@@ -205,13 +205,6 @@ void Settings::LoadForms()
 	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
 	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
 
-    MAG_ChargedShotSpell01 = dataHandler->LookupForm(ParseFormID("0x1B"), FileName)->As<RE::SpellItem>();
-    MAG_ChargedShotSpell02 = dataHandler->LookupForm(ParseFormID("0x1E"), FileName)->As<RE::SpellItem>();
-    MAG_ChargedShotSpell03 = dataHandler->LookupForm(ParseFormID("0x1F"), FileName)->As<RE::SpellItem>();
-
-    MAG_ChargedShotTimer01 = dataHandler->LookupForm(ParseFormID("0x28"), FileName)->As<RE::TESGlobal>();
-    MAG_ChargedShotTimer02 = dataHandler->LookupForm(ParseFormID("0x2C"), FileName)->As<RE::TESGlobal>();
-
 	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
 
 	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
@@ -221,12 +214,13 @@ void Settings::LoadForms()
 	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
 
     MAG_BlockCostGlobal = dataHandler->LookupForm(RE::FormID(0xADA618), "Update.esm")->As<RE::TESGlobal>();
-    MAG_BashCostGlobal  = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
+    MAG_BashCostGlobal  = dataHandler->LookupForm(RE::FormID(0xADA619), "Update.esm")->As<RE::TESGlobal>();
 
 	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
 	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
 	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
 	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    MagicWard                  = dataHandler->LookupForm(RE::FormID(0x1EA69), "Skyrim.esm")->As<RE::BGSKeyword>();
 
     MAG_DifficultyGlobal = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
 
@@ -235,11 +229,6 @@ void Settings::LoadForms()
 	if (smGlobal) {
 		Survival_ModeEnabled = smGlobal->As<RE::TESGlobal>();
 	}
-
-	if (dataHandler->LookupModByName("Starfrost.esp"))
-	{
-		starfrostInstalled = true;
-	}	
 
 	SetGlobalsAndGameSettings();
 

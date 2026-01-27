@@ -16,8 +16,5 @@ private:
     static void HandleIsSneakingState();
     static void HandleIsSwimmingState();
     static void HandleIsSprintingState();
-    static void HandleIsBowZoomedState();
     static void RemoveAllStateSpells();
-    static void ApplyZoomSpell();
-    static void RemoveZoomSpells();
 };

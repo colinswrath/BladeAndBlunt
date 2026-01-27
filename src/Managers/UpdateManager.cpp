@@ -5,20 +5,20 @@ std::int32_t UpdateManager::OnFrameUpdate(std::int64_t a1)
 {
     auto settings = Settings::GetSingleton();
 
-    if (frameCount > settings->maxFrameCheck) {
-        frameCount = 0;
-    }
-    else {
-        PlayerFrameStateHandler::UpdatePlayerState(frameCount);
+        if (frameCount > settings->maxFrameCheck) {
+            frameCount = 0;
+        }
+        else {
+            PlayerFrameStateHandler::UpdatePlayerState(frameCount);
 
-        // Check difficulty global
-        settings->MAG_DifficultyGlobal->value = Cache::GetPlayerSingleton()->GetGameStatsData().difficulty;
-    }
+            // Check difficulty global
+            settings->MAG_DifficultyGlobal->value = Cache::GetPlayerSingleton()->GetGameStatsData().difficulty;
+        }
 
-    if (!Cache::GetUISingleton()->GameIsPaused()) {
-        // Check for tasks to perform. ie. delaying forcing out of bow draw use the task system
-        TaskManager::GetSingleton().Update();
-    }
+        if (!Cache::GetUISingleton()->GameIsPaused()) {
+            // Check for tasks to perform. ie. delaying forcing out of bow draw use the task system
+            TaskManager::GetSingleton().Update();
+        }
 
     frameCount++;
     return _OnFrameFunction(a1);

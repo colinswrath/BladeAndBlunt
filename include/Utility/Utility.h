@@ -63,6 +63,23 @@ namespace Utility
 		return false;
 	}
 
+    inline static bool PlayerHasActiveMagicEffectWithKeyword(RE::BGSKeyword* keyword)
+    {
+        auto player = RE::PlayerCharacter::GetSingleton();
+
+        auto               activeEffects = player->AsMagicTarget()->GetActiveEffectList();
+        RE::EffectSetting* setting       = nullptr;
+        for (auto& effect : *activeEffects) {
+            setting = effect ? effect->GetBaseObject() : nullptr;
+            if (setting) {
+                if ((setting->HasKeywordID(keyword->GetFormID()))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 	static inline bool IsSurvivalEnabled() {
 		auto settings = Settings::GetSingleton();
 		if (!settings || !settings->Survival_ModeEnabled) {

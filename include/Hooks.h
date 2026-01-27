@@ -15,6 +15,9 @@ namespace Hooks
 	static REL::Relocation<std::uintptr_t> armorRating2(REL::RelocationID(37605, 38558));
     static REL::Relocation<std::uintptr_t> staggerHook(REL::RelocationID(34188, 34982), 0x61);
 
+    static REL::Relocation<std::uintptr_t> hitDataPop(REL::RelocationID(34188, 44014)); //Wrong 1.5 address
+
+
     bool InstallHooks();
     bool InstallBashMultHook();
     bool InstallTrueHUDHook();

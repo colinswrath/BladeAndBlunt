@@ -53,6 +53,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();
 			settings->ReplacePowerAttackKeywords();
+            settings->ToggleSMIFromBnB();
 
             if (!Hooks::InstallStaggerHUDHook()) {
                 logger::warn("Stagger HUD installation failed.");
@@ -69,7 +70,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 
 extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v{};
-    v.PluginVersion(REL::Version{ 3,5,0,0 });
+    v.PluginVersion(REL::Version{ 4,0,0,0 });
     v.PluginName("BladeAndBlunt"sv);
     v.AuthorName("colinswrath and Kernalsegg"sv);
     v.UsesAddressLibrary(true);
@@ -105,9 +106,7 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
 	if (auto serialization = SKSE::GetSerializationInterface()) {
 		serialization->SetUniqueID(Serialization::ID);
-		serialization->SetSaveCallback(&Serialization::SaveCallback);
 		serialization->SetLoadCallback(&Serialization::LoadCallback);
-		serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 
 	logger::info("Blade and Blunt loaded.");

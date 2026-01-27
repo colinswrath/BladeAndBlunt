@@ -4,6 +4,7 @@
 #include "patches/BashBlockStaminaPatch.h"
 #include "Events.h"
 #include "patches/MiscPatches.h"
+#include "patches/BlockPowerAttackScalingPatch.h"
 
 namespace Hooks
 {
@@ -33,6 +34,8 @@ namespace Hooks
 		if (!BashBlockStaminaPatch::InstallBlockMultHook()) {
 			return false;
 		}
+
+        BlockPowerAttackScalingPatch::InstallBlockPowerAttackPatch();
 
 		return true;
 	}

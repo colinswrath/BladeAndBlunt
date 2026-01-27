@@ -36,11 +36,6 @@ void PlayerFrameStateHandler::UpdatePlayerState(int frameCount)
             break;
         }
     }
-
-    //Bow zoom state is handled every frame (that game is not paused)
-    if (!Cache::GetUISingleton()->GameIsPaused()) {
-        HandleIsBowZoomedState();
-    }
 }
 
 void PlayerFrameStateHandler::HandleIsCastingState()
@@ -240,49 +235,49 @@ void PlayerFrameStateHandler::HandleIsSprintingState()
     }
 }
 
-void PlayerFrameStateHandler::HandleIsBowZoomedState()
-{
-    if (Cache::g_deltaTime > 0) {
-        auto playerCamera = RE::PlayerCamera::GetSingleton();
-
-        if (playerCamera->bowZoomedIn) {
-            // Note zoom start time
-            zoomTime += Cache::g_deltaTime;
-            // Apply appropriate spell based on time dif
-            ApplyZoomSpell();
-        }
-        else {
-            // Remove spells and reset zoom timer
-            zoomTime = 0;
-            RemoveZoomSpells();
-        }
-    }
-}
-
-void PlayerFrameStateHandler::ApplyZoomSpell()
-{
-    auto                 settings = Settings::GetSingleton();
-    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
-
-    if (zoomTime > settings->MAG_ChargedShotTimer02->value) {
-        player->RemoveSpell(settings->MAG_ChargedShotSpell02);
-        player->AddSpell(settings->MAG_ChargedShotSpell03);
-    }
-    else if (zoomTime > settings->MAG_ChargedShotTimer01->value) {
-        player->RemoveSpell(settings->MAG_ChargedShotSpell01);
-        player->AddSpell(settings->MAG_ChargedShotSpell02);
-    }
-    else if (zoomTime < settings->MAG_ChargedShotTimer01->value) {
-        player->AddSpell(settings->MAG_ChargedShotSpell01);
-    }
-}
-
-void PlayerFrameStateHandler::RemoveZoomSpells()
-{
-    auto                 settings = Settings::GetSingleton();
-    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
-
-    player->RemoveSpell(settings->MAG_ChargedShotSpell01);
-    player->RemoveSpell(settings->MAG_ChargedShotSpell02);
-    player->RemoveSpell(settings->MAG_ChargedShotSpell03);
-}
+//void PlayerFrameStateHandler::HandleIsBowZoomedState()
+//{
+//    if (Cache::g_deltaTime > 0) {
+//        auto playerCamera = RE::PlayerCamera::GetSingleton();
+//
+//        if (playerCamera->bowZoomedIn) {
+//            // Note zoom start time
+//            zoomTime += Cache::g_deltaTime;
+//            // Apply appropriate spell based on time dif
+//            ApplyZoomSpell();
+//        }
+//        else {
+//            // Remove spells and reset zoom timer
+//            zoomTime = 0;
+//            RemoveZoomSpells();
+//        }
+//    }
+//}
+//
+//void PlayerFrameStateHandler::ApplyZoomSpell()
+//{
+//    auto                 settings = Settings::GetSingleton();
+//    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
+//
+//    if (zoomTime > settings->MAG_ChargedShotTimer02->value) {
+//        player->RemoveSpell(settings->MAG_ChargedShotSpell02);
+//        player->AddSpell(settings->MAG_ChargedShotSpell03);
+//    }
+//    else if (zoomTime > settings->MAG_ChargedShotTimer01->value) {
+//        player->RemoveSpell(settings->MAG_ChargedShotSpell01);
+//        player->AddSpell(settings->MAG_ChargedShotSpell02);
+//    }
+//    else if (zoomTime < settings->MAG_ChargedShotTimer01->value) {
+//        player->AddSpell(settings->MAG_ChargedShotSpell01);
+//    }
+//}
+//
+//void PlayerFrameStateHandler::RemoveZoomSpells()
+//{
+//    auto                 settings = Settings::GetSingleton();
+//    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
+//
+//    player->RemoveSpell(settings->MAG_ChargedShotSpell01);
+//    player->RemoveSpell(settings->MAG_ChargedShotSpell02);
+//    player->RemoveSpell(settings->MAG_ChargedShotSpell03);
+//}
