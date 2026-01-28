@@ -199,36 +199,37 @@ void Settings::LoadForms()
     } 
 
     //Hardcoded loads
-	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
-
-	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
-	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
-	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
-
-	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
-
-	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
-	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
-
-	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
-	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
-
-    MAG_BlockCostGlobal = dataHandler->LookupForm(RE::FormID(0xADA618), "Update.esm")->As<RE::TESGlobal>();
-    MAG_BashCostGlobal  = dataHandler->LookupForm(RE::FormID(0xADA619), "Update.esm")->As<RE::TESGlobal>();
-
-	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
-	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
-	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
-	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
-    MagicWard                  = dataHandler->LookupForm(RE::FormID(0x1EA69), "Skyrim.esm")->As<RE::BGSKeyword>();
-
-    MAG_DifficultyGlobal = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
+	MAGParryControllerSpell         = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
+	MAGParryStaggerSpell            = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
+	MAGBlockStaggerSpell            = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
+	MAGBlockStaggerSpell2           = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
+	MAGCrossbowStaminaDrainSpell    = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
+	MAG_InjuryCooldown1             = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
+	MAG_InjuryCooldown2             = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
+	MAG_ParryWindowEffect           = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
+	MAG_InjuriesSMOnly              = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
+    MAG_BlockCostGlobal             = dataHandler->LookupForm(RE::FormID(0xADA618), "Update.esm")->As<RE::TESGlobal>();
+    MAG_BashCostGlobal              = dataHandler->LookupForm(RE::FormID(0xADA619), "Update.esm")->As<RE::TESGlobal>();
+	MAG_levelBasedDifficulty        = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
+	MAG_PowerAttackReplacement      = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
+	MAG_InjuryAndRest               = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
+	HealthPenaltyUIGlobal           = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    MagicWard                       = dataHandler->LookupForm(RE::FormID(0x1EA69), "Skyrim.esm")->As<RE::BGSKeyword>();
+    MAG_DifficultyGlobal            = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
 
 	auto smGlobal = dataHandler->LookupForm(RE::FormID(0x826), "ccqdrsse001-survivalmode.esl");
 
 	if (smGlobal) {
 		Survival_ModeEnabled = smGlobal->As<RE::TESGlobal>();
 	}
+
+    //NPC state spells
+    MAG_AttackStaminaStuntSpellNPC      = dataHandler->LookupForm(ParseFormID("0x45"), FileName)->As<RE::SpellItem>();
+    MAG_BlockStaminaStuntSpellNPC       = dataHandler->LookupForm(ParseFormID("0x4B"), FileName)->As<RE::SpellItem>();
+    MAG_BowStaminaStuntSpellNPC         = dataHandler->LookupForm(ParseFormID("0x53"), FileName)->As<RE::SpellItem>();
+    MAG_CastStaminaStuntSpellNPC        = dataHandler->LookupForm(ParseFormID("0x47"), FileName)->As<RE::SpellItem>();
+    MAG_CrossbowFiredStaminaSpellNPC    = dataHandler->LookupForm(ParseFormID("0x54"), FileName)->As<RE::SpellItem>();
+    MAG_CrossbowStaminaStuntSpellNPC    = dataHandler->LookupForm(ParseFormID("0x52"), FileName)->As<RE::SpellItem>();
 
 	SetGlobalsAndGameSettings();
 

@@ -9,6 +9,7 @@
 using namespace Utility;
 
 static int frameCount{};
+static float lastTime;
 
 class UpdateManager
 {

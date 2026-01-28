@@ -3,7 +3,7 @@
 namespace BlockPowerAttackScalingPatch
 {
     //26425
-    float GetAttackDamageReduction(float f1, float f2, float f3, bool blockedWithWeapon1, bool blockedWithWeapon2, bool isPowerAttack, RE::Actor* actor)
+    float GetAttackDamageReduction(float f1, float f2, float f3, bool blockedWithWeapon1, bool blockedWithWeapon2, bool isPowerAttack, [[maybe_unused]] RE::Actor* actor)
     {
         //Still trying to figure out exactly what these are
         //f1 -> somehow related to attack. Maybe its attack damage?
@@ -41,7 +41,7 @@ namespace BlockPowerAttackScalingPatch
         else
         {
             percentBlocked = (((armorFactor + f3) * f1 * shieldScale * 0.01f) + shieldBase);
-            std::clamp(powerAttckMult += 0.25f,0.0f,1.0f);    //If blocking with a shield increase power attack mult by 25%
+            powerAttckMult += 0.25f; // If blocking with a shield increase power attack mult by 25%
         }
 
         if (isPowerAttack) {

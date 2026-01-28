@@ -1,5 +1,6 @@
 #include "Managers/PlayerFrameStateHandler.h"
 #include "Settings.h"
+#include "Utility/Extensions.h"
 #include "Utility/Utility.h"
 
 void PlayerFrameStateHandler::UpdatePlayerState(int frameCount)
@@ -44,12 +45,12 @@ void PlayerFrameStateHandler::HandleIsCastingState()
     RE::PlayerCharacter* player = Cache::GetPlayerSingleton();
 
     if (player->IsCasting(nullptr)) {
-        if (settings->IsCastingSpell && !player->HasSpell(settings->IsCastingSpell)) {
+        if (settings->IsCastingSpell && !Actor::HasSpell(player,settings->IsCastingSpell)) {
             player->AddSpell(settings->IsCastingSpell);
         }
     }
-    else if (settings->IsCastingSpell && player->HasSpell(settings->IsCastingSpell)) {
-        player->RemoveSpell(settings->IsCastingSpell);
+    else if (settings->IsCastingSpell && Actor::HasSpell(player,settings->IsCastingSpell)) {
+        Actor::RemoveSpell(player,settings->IsCastingSpell);
     }
 }
 
@@ -58,14 +59,14 @@ void PlayerFrameStateHandler::HandleIsDrawingBowState()
     auto                 settings = Settings::GetSingleton();
     RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
 
-    if (Utility::IsDrawingBow(player)) {
+    if (Actor::IsDrawingBow(player)) {
 
-        if (!player->HasSpell(settings->BowStaminaSpell)) {
+        if (!Actor::HasSpell(player,settings->BowStaminaSpell)) {
             player->AddSpell(settings->BowStaminaSpell);
         }
     }
-    else if (player->HasSpell(settings->BowStaminaSpell)) {
-        player->RemoveSpell(settings->BowStaminaSpell);
+    else if (Actor::HasSpell(player,settings->BowStaminaSpell)) {
+        Actor::RemoveSpell(player,settings->BowStaminaSpell);
     }
 }
 
@@ -74,14 +75,14 @@ void PlayerFrameStateHandler::HandleIsDrawingXbowState()
     const auto settings = Settings::GetSingleton();
     const auto player   = Cache::GetPlayerSingleton();
 
-    const bool isDrawingXbow = Utility::IsDrawingBow(player, true);
-    const bool hasXbowSpell  = player->HasSpell(settings->XbowStaminaSpell);
+    const bool isDrawingXbow = Actor::IsDrawingBow(player, true);
+    const bool hasXbowSpell  = Actor::HasSpell(player,settings->XbowStaminaSpell);
 
     if (isDrawingXbow && !hasXbowSpell) {
         player->AddSpell(settings->XbowStaminaSpell);
     }
     else if (!isDrawingXbow && hasXbowSpell) {
-        player->RemoveSpell(settings->XbowStaminaSpell);
+        Actor::RemoveSpell(player,settings->XbowStaminaSpell);
     }
 }
 
@@ -90,8 +91,8 @@ void PlayerFrameStateHandler::HandleIsAttackingState()
     const auto settings = Settings::GetSingleton();
     const auto player   = Cache::GetPlayerSingleton();
 
-    const bool isAttacking = player->IsAttacking();
-    const bool hasAttackingSpell = player->HasSpell(settings->IsAttackingSpell);
+    const bool isAttacking = Actor::IsAttacking(player);
+    const bool hasAttackingSpell = Actor::HasSpell(player, settings->IsAttackingSpell);
 
     if (isAttacking) {
         settings->wasPowerAttacking = Utility::IsPowerAttacking(player);
@@ -100,7 +101,7 @@ void PlayerFrameStateHandler::HandleIsAttackingState()
         }
     }
     else if (!isAttacking && hasAttackingSpell) {
-        player->RemoveSpell(settings->IsAttackingSpell);
+        Actor::RemoveSpell(player,settings->IsAttackingSpell);
         if (settings->wasPowerAttacking) {
             settings->wasPowerAttacking = false;
             Utility::ApplySpell(player, player, settings->PowerAttackStopSpell);
@@ -121,7 +122,7 @@ void PlayerFrameStateHandler::HandleIsBlockingState()
     }
 
     const bool isBlocking       = player->IsBlocking();
-    const bool hasBlockingSpell = player->HasSpell(settings->IsBlockingSpell);
+    const bool hasBlockingSpell = Actor::HasSpell(player,settings->IsBlockingSpell);
 
 
     if (isBlocking) {
@@ -138,7 +139,7 @@ void PlayerFrameStateHandler::HandleIsBlockingState()
     else {
         settings->IsBlockingWeaponSpellCasted = false;
         if (hasBlockingSpell) {
-            player->RemoveSpell(settings->IsBlockingSpell);
+            Actor::RemoveSpell(player,settings->IsBlockingSpell);
         }
     }
 }
@@ -149,13 +150,13 @@ void PlayerFrameStateHandler::HandleIsSneakingState()
     const auto player   = Cache::GetPlayerSingleton();
 
     const bool isSneakingAndMoving = player->IsSneaking() && player->IsMoving();
-    const bool hasSneakingSpell    = player->HasSpell(settings->IsSneakingSpell);
+    const bool hasSneakingSpell    = Actor::HasSpell(player,settings->IsSneakingSpell);
 
     if (isSneakingAndMoving && !hasSneakingSpell && settings->enableSneakStaminaCost) {
         player->AddSpell(settings->IsSneakingSpell);
     }
     else if ((!isSneakingAndMoving || !settings->enableSneakStaminaCost) && hasSneakingSpell) {
-        player->RemoveSpell(settings->IsSneakingSpell);
+        Actor::RemoveSpell(player,settings->IsSneakingSpell);
     }
 }
 
@@ -165,13 +166,13 @@ void PlayerFrameStateHandler::HandleIsSwimmingState()
     const auto player   = Cache::GetPlayerSingleton();
 
     const bool isSwimmingAndMoving = player->AsActorState()->IsSwimming() && player->IsMoving();
-    const bool hasSwimmingSpell    = player->HasSpell(settings->IsSwimmingSpell);
+    const bool hasSwimmingSpell    = Actor::HasSpell(player,settings->IsSwimmingSpell);
 
     if (isSwimmingAndMoving && !hasSwimmingSpell) {
         player->AddSpell(settings->IsSwimmingSpell);
     }
     else if (!isSwimmingAndMoving && hasSwimmingSpell) {
-        player->RemoveSpell(settings->IsSwimmingSpell);
+        Actor::RemoveSpell(player,settings->IsSwimmingSpell);
     }
 }
 
@@ -181,31 +182,31 @@ void PlayerFrameStateHandler::RemoveAllStateSpells()
     RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
 
     if (settings->IsCastingSpell)
-        player->RemoveSpell(settings->IsCastingSpell);
+        Actor::RemoveSpell(player,settings->IsCastingSpell);
 
     if (settings->BowStaminaSpell)
-        player->RemoveSpell(settings->BowStaminaSpell);
+        Actor::RemoveSpell(player,settings->BowStaminaSpell);
 
     if (settings->IsAttackingSpell)
-        player->RemoveSpell(settings->IsAttackingSpell);
+        Actor::RemoveSpell(player,settings->IsAttackingSpell);
 
     if (settings->XbowStaminaSpell)
-        player->RemoveSpell(settings->XbowStaminaSpell);
+        Actor::RemoveSpell(player,settings->XbowStaminaSpell);
 
     if (settings->IsAttackingSpell)
-        player->RemoveSpell(settings->IsAttackingSpell);
+        Actor::RemoveSpell(player,settings->IsAttackingSpell);
 
     if (settings->IsBlockingSpell)
-        player->RemoveSpell(settings->IsBlockingSpell);
+        Actor::RemoveSpell(player,settings->IsBlockingSpell);
 
     if (settings->IsSneakingSpell)
-        player->RemoveSpell(settings->IsSneakingSpell);
+        Actor::RemoveSpell(player,settings->IsSneakingSpell);
 
     if (settings->IsSprintingSpell)
-        player->RemoveSpell(settings->IsSprintingSpell);
+        Actor::RemoveSpell(player,settings->IsSprintingSpell);
 
     if (settings->IsSwimmingSpell)
-        player->RemoveSpell(settings->IsSwimmingSpell);
+        Actor::RemoveSpell(player,settings->IsSwimmingSpell);
 }
 
 void PlayerFrameStateHandler::HandleIsSprintingState()
@@ -222,12 +223,12 @@ void PlayerFrameStateHandler::HandleIsSprintingState()
             actorCheck->AddSpell(settings->MountSprintingSpell);
         }
         else {
-            if (!player->HasSpell(settings->IsSprintingSpell))
+            if (!Actor::HasSpell(player,settings->IsSprintingSpell))
                 player->AddSpell(settings->IsSprintingSpell);
         }
     }
-    else if (player->HasSpell(settings->IsSprintingSpell)) {
-        player->RemoveSpell(settings->IsSprintingSpell);
+    else if (Actor::HasSpell(player,settings->IsSprintingSpell)) {
+        Actor::RemoveSpell(player,settings->IsSprintingSpell);
 
         if (actorCheck) {
             actorCheck->RemoveSpell(settings->MountSprintingSpell);
@@ -260,11 +261,11 @@ void PlayerFrameStateHandler::HandleIsSprintingState()
 //    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
 //
 //    if (zoomTime > settings->MAG_ChargedShotTimer02->value) {
-//        player->RemoveSpell(settings->MAG_ChargedShotSpell02);
+//        Actor::RemoveSpell(player,settings->MAG_ChargedShotSpell02);
 //        player->AddSpell(settings->MAG_ChargedShotSpell03);
 //    }
 //    else if (zoomTime > settings->MAG_ChargedShotTimer01->value) {
-//        player->RemoveSpell(settings->MAG_ChargedShotSpell01);
+//        Actor::RemoveSpell(player,settings->MAG_ChargedShotSpell01);
 //        player->AddSpell(settings->MAG_ChargedShotSpell02);
 //    }
 //    else if (zoomTime < settings->MAG_ChargedShotTimer01->value) {
@@ -277,7 +278,7 @@ void PlayerFrameStateHandler::HandleIsSprintingState()
 //    auto                 settings = Settings::GetSingleton();
 //    RE::PlayerCharacter* player   = Cache::GetPlayerSingleton();
 //
-//    player->RemoveSpell(settings->MAG_ChargedShotSpell01);
-//    player->RemoveSpell(settings->MAG_ChargedShotSpell02);
-//    player->RemoveSpell(settings->MAG_ChargedShotSpell03);
+//    Actor::RemoveSpell(player,settings->MAG_ChargedShotSpell01);
+//    Actor::RemoveSpell(player,settings->MAG_ChargedShotSpell02);
+//    Actor::RemoveSpell(player,settings->MAG_ChargedShotSpell03);
 //}

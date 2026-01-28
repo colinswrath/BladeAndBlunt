@@ -16,11 +16,11 @@ public:
 
 	void CheckInjuryAvPenalty()
 	{
-		auto settings = Settings::GetSingleton();
-		if ((settings->enableInjuries && !settings->SMOnlyEnableInjuries) || 
-			(settings->SMOnlyEnableInjuries && settings->enableInjuries && Utility::IsSurvivalEnabled())) {
-			auto player = Cache::GetPlayerSingleton();
+        //If SMIhandlingInjuries is false OR (SMIHandlingInjuries is true and SM is off then we handle updates)
 
+		auto settings = Settings::GetSingleton();
+		if (ShouldHandleInjuryPenalties()) {
+			auto player = Cache::GetPlayerSingleton();
 			if (player->HasSpell(settings->InjurySpell1)) {
 				ApplyAttributePenalty(settings->injury1AVPercent);
 			} else if (player->HasSpell(settings->InjurySpell2)) {
@@ -34,6 +34,25 @@ public:
 			RemoveAttributePenalty();
 		}
 	}
+
+    bool ShouldHandleInjuryPenalties()
+    {
+        auto settings = Settings::GetSingleton();
+
+        if (!settings->enableInjuries){
+            return false;
+        }
+
+        if (settings->SMIHandlingInjuries && Utility::IsSurvivalEnabled()){
+            return false;
+        }
+
+        if (settings->SMOnlyEnableInjuries && !Utility::IsSurvivalEnabled()){
+            return false;
+        }
+
+        return true;
+    }
 
 	void ApplyAttributePenalty(float percentPen)
 	{
@@ -57,8 +76,6 @@ public:
 		currentInjuryPenalty = newPenaltyMag;
 		
 		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta);	//Damage or restore AV
-
-		SetAttributePenaltyUIGlobal(percentPen);
 	}
 
 	void RemoveAttributePenalty()

@@ -4,7 +4,9 @@ namespace Cache
 {
 	inline uintptr_t IsAttackingAddress;
 	inline uintptr_t IsBlockingAddress;
-	inline uintptr_t HasSpellAddress;
+    inline uintptr_t HasSpellAddress;
+    inline uintptr_t RemoveSpellAddress;
+    inline uintptr_t IsCastingAddress;
     inline uintptr_t PlayerSingletonAddress;
     inline uintptr_t UISingletonAddress;
     inline uintptr_t PlayerCameraSingletonAddress;
@@ -14,30 +16,15 @@ namespace Cache
 
 	inline void CacheAddLibAddresses()
 	{
-		//1.6 = 38590
-		//1.5.97 = 37637
-		IsAttackingAddress = REL::RelocationID(37637, 38590).address();
-
-		//1.6 = 37952
-		//1.5.97 = 36927
-		IsBlockingAddress = REL::RelocationID(36927, 37952).address();
-
-		//1.6 = 38782
-		//1.5.97 = 37828
-		HasSpellAddress = REL::RelocationID(37828, 38782).address();
-
-		//1.6 = 403521
-		//1.5 = 517014
-		PlayerSingletonAddress = REL::RelocationID(517014, 403521).address();
-
-        UISingletonAddress = REL::RelocationID(514178, 400327).address();
-
+		IsAttackingAddress      = REL::RelocationID(37637, 38590).address();
+		IsBlockingAddress       = REL::RelocationID(36927, 37952).address();
+		HasSpellAddress         = REL::RelocationID(37828, 38782).address();
+        RemoveSpellAddress      = RELOCATION_ID(37772, 38717).address();
+        IsCastingAddress        = RELOCATION_ID(37810, 38759).address(); 
+		PlayerSingletonAddress  = REL::RelocationID(517014, 403521).address();
+        UISingletonAddress      = REL::RelocationID(514178, 400327).address();
         PlayerCameraSingletonAddress = REL::RelocationID(514642, 400802).address();
-
-		//1.6 = 375300
-		//1.5 = 505721
 		fPlayerMaxResistanceAddress = { REL::RelocationID(505721, 375300).address()};
-
 		getUnarmedWeaponAddress = { REL::RelocationID(514923, 401061).address() };
 	}
 

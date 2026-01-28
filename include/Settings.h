@@ -28,6 +28,13 @@ public:
     RE::SpellItem* MAGParryControllerSpell;
 	RE::SpellItem* MAGCrossbowStaminaDrainSpell;
 
+    RE::SpellItem* MAG_AttackStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_BlockStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_BowStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_CastStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_CrossbowFiredStaminaSpellNPC;
+    RE::SpellItem* MAG_CrossbowStaminaStuntSpellNPC;
+
 	RE::SpellItem* InjurySpell1;
 	RE::SpellItem* InjurySpell2;
     RE::SpellItem* InjurySpell3;
@@ -68,6 +75,8 @@ public:
     std::string staggerBarColor;
     std::string staggerFlashColor;
 
+    bool SMIHandlingInjuries;
+
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;
 	bool enableSneakStaminaCost;
@@ -78,9 +87,9 @@ public:
 
     bool wasPowerAttacking=false;
 	
-	float injury1AVPercent;
-	float injury2AVPercent;
-	float injury3AVPercent;
+	float injury1AVPercent = 0.1f;
+	float injury2AVPercent = 0.25f;
+	float injury3AVPercent = 0.5f;
 	float injuryUpdateFrequency = 0.5f;
     float zoomTimeThreshold2    = 3.0;
     float zoomTimeThreshold3    = 10.0; 
@@ -138,5 +147,6 @@ public:
         logger::info("SMI detected. Relinquishing healthbar control");
         auto smi = static_cast<SMI_API::IVSmi1*>(handle);
         smi->SetInjuryHandlingEnabled(true);
+        SMIHandlingInjuries = true;
     }
 };

@@ -5,41 +5,6 @@
 //Originally intended to just implement some condition functions but iv been placing extensions/utility here as well
 namespace Utility
 {
-    static inline bool IsDrawingBow(RE::Actor* actor, bool crossbow = false)
-    {
-        auto attackState = actor->AsActorState()->GetAttackState();
-
-        auto equippedWeapon = skyrim_cast<RE::TESObjectWEAP*>(actor->GetEquippedObject(false));
-        if (!equippedWeapon) {
-            return false;
-        }
-
-        RE::WEAPON_TYPE type = RE::WEAPON_TYPE::kBow;
-
-        if (crossbow)
-        {
-            type = RE::WEAPON_TYPE::kCrossbow;
-        }
-
-        switch (attackState) {
-        case RE::ATTACK_STATE_ENUM::kBowDrawn: {
-            if (equippedWeapon->GetWeaponType() == type) {
-                return true;
-            }
-            break;
-        }
-        case RE::ATTACK_STATE_ENUM::kBowAttached: {
-            if (!crossbow && equippedWeapon->GetWeaponType() == RE::WEAPON_TYPE::kBow) {
-                return true;
-            }
-            break;
-        }
-        default:
-            break;
-        }
-        return false;
-    }
-
 	static inline RE::TESObjectWEAP* GetUnarmedWeapon()
 	{
 		auto** singleton{ reinterpret_cast<RE::TESObjectWEAP**>(Cache::getUnarmedWeaponAddress) };

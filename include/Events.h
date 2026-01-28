@@ -168,9 +168,15 @@ public:
 
 		auto source = a_source->As<RE::Actor>();
 
-		if (source->IsPlayerRef() && (a_weapon->IsCrossbow() || a_weapon->IsBow())) {
+        //Player fire
+		if (source->IsPlayerRef() && a_weapon->IsCrossbow()) {
 			Utility::ApplySpell(source, source,Settings::GetSingleton()->MAGCrossbowStaminaDrainSpell);
-		}
+        }
+        //NPC fire
+        else if (a_weapon->IsCrossbow())
+        {
+            Utility::ApplySpell(source, source, Settings::GetSingleton()->MAG_CrossbowFiredStaminaSpellNPC);
+        }
 
 	}
 	inline static REL::Relocation<decltype(WeaponFire)> _Weapon_Fire;

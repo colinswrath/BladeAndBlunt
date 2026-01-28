@@ -1,4 +1,5 @@
 #include "Managers/UpdateManager.h"
+#include "Managers/NPCUpdateManager.h"
 #include "Managers/StaggerHUDManager.h"
 #include "patches/ArmorRatingScaling.h"
 #include "patches/BashBlockStaminaPatch.h"
@@ -10,7 +11,8 @@ namespace Hooks
 {
 	bool InstallHooks()
 	{
-		if (!UpdateManager::Install()) { return false; }
+        if (!UpdateManager::Install()) {return false;}
+        if (!NPCUpdateManager::Install()) {return false;}
 		if (!MiscPatches::MiscPatches::InstallScalePatch()) { return false; }
 		if (!MiscPatches::MiscPatches::InstallFBlockPatch()) { return false; }
 		if (!MiscPatches::MiscPatches::InstallSpellCapPatch()) { return false; }
