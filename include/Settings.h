@@ -87,12 +87,13 @@ public:
 
     bool wasPowerAttacking=false;
 	
-	float injury1AVPercent = 0.1f;
-	float injury2AVPercent = 0.25f;
-	float injury3AVPercent = 0.5f;
-	float injuryUpdateFrequency = 0.5f;
-    float zoomTimeThreshold2    = 3.0;
-    float zoomTimeThreshold3    = 10.0; 
+    const std::string INJURY_RESIST = "InjuryResist";
+	const float injury1AVPercent = 0.1f;
+	const float injury2AVPercent = 0.25f;
+	const float injury3AVPercent = 0.5f;
+	const float injuryUpdateFrequency = 0.5f;
+    const float zoomTimeThreshold2    = 3.0;
+    const float zoomTimeThreshold3    = 10.0; 
 
 	bool IsBlockingWeaponSpellCasted = false;
 

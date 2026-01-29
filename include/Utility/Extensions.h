@@ -82,3 +82,13 @@ namespace Actor
         return func(actor, a_spell);
     }
 }
+
+namespace ActorValue
+{
+    static RE::ActorValue GetActorValueIDFromName(const char* av_name)
+    {
+        using func_t = decltype(&GetActorValueIDFromName);
+        REL::Relocation<func_t> func{ Cache::GetActorValueByNameAddress };
+        return func(av_name);
+    }
+}

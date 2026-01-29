@@ -32,9 +32,7 @@ class StaggerHUDManager
 public:
     static bool InstallStaggerHUDHook();
     static bool InstallTrueHUDHook();
-
     static bool RequestStaggerBarControl();
-    static RE::ActorValue GetActorValueIDFromName(const char* av_name);
     static void SetBarStyle();
 
 private:

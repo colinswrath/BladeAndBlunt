@@ -3,6 +3,7 @@
 #include <RecentHitEventData.h>
 #include <Utility/Utility.h>
 #include <Settings.h>
+#include "Utility/Extensions.h"
 
 class InjuryApplicationManager
 {
@@ -71,7 +72,10 @@ private:
         auto random = clib_util::RNG(rd()).Generate<float>(0.0f, 100.0f);
         auto* avOwner = player->AsActorValueOwner();
         auto health = avOwner->GetActorValue(RE::ActorValue::kHealth);
-        auto injuryResist = avOwner->GetActorValue(RE::ActorValue::kShieldPerks);
+
+        auto injuryResistAv_val = ActorValue::GetActorValueIDFromName(settings->INJURY_RESIST.data());
+        auto injuryResist          = avOwner->GetActorValue(injuryResistAv_val);
+        //auto injuryResist = avOwner->GetActorValue(RE::ActorValue::kShieldPerks);
 
         auto injuryResistMult = std::clamp((1 + injuryResist * -0.01f),0.25f,1.0f);
         auto finalChanceMult  = chanceMult * injuryResistMult;

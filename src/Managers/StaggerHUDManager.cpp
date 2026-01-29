@@ -1,6 +1,7 @@
 #include "Managers/StaggerHUDManager.h"
 #include "Hooks.h"
 #include "Settings.h"
+#include "Utility/Extensions.h"
 
 bool StaggerHUDManager::InstallTrueHUDHook()
 {
@@ -19,7 +20,7 @@ float StaggerHUDBase::GetCurrentStaggerCooldown(RE::Actor* a_actor)
     if (a_actor) {
         auto settings = Settings::GetSingleton();
         if (auto a_avOwner = a_actor->AsActorValueOwner()) {
-            auto staggerAV_val = StaggerHUDManager::GetActorValueIDFromName(settings->staggerAV_str.data());
+            auto staggerAV_val = ActorValue::GetActorValueIDFromName(settings->staggerAV_str.data());
             auto staggerAV = a_avOwner->GetActorValue(staggerAV_val);
             return staggerAV;
         }
@@ -54,13 +55,6 @@ void StaggerHUDManager::Update(RE::Actor* a_actor, float a_zPos, RE::TESObjectCE
     }
 
     return _Update(a_actor, a_zPos, a_cell);
-}
-
-RE::ActorValue StaggerHUDManager::GetActorValueIDFromName(const char* av_name)
-{
-    using func_t = decltype(&GetActorValueIDFromName);
-    REL::Relocation<func_t> func{ REL::RelocationID(26570, 27203) };
-    return func(av_name);
 }
 
 bool StaggerHUDManager::RequestStaggerBarControl()
