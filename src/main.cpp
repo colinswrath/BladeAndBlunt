@@ -107,6 +107,8 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 	if (auto serialization = SKSE::GetSerializationInterface()) {
 		serialization->SetUniqueID(Serialization::ID);
 		serialization->SetLoadCallback(&Serialization::LoadCallback);
+        serialization->SetSaveCallback(&Serialization::SaveCallback);
+        serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 
 	logger::info("Blade and Blunt loaded.");

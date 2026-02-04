@@ -52,7 +52,7 @@ void ActorFrameStateHandler::HandleIsCastingState(RE::Actor* actor)
             actor->AddSpell(settings->MAG_CastStaminaStuntSpellNPC);
         }
     }
-    else if (settings->MAG_CastStaminaStuntSpellNPC && Actor::HasSpell(actor, settings->IsCastingSpell)) {
+    else if (settings->MAG_CastStaminaStuntSpellNPC && Actor::HasSpell(actor, settings->MAG_CastStaminaStuntSpellNPC)) {
         Actor::RemoveSpell(actor, settings->MAG_CastStaminaStuntSpellNPC);
     }
 }
