@@ -22,22 +22,26 @@ namespace Hooks
 		WeaponFireHandler::InstallArrowReleaseHook();
 
 		auto runtime = REL::Module::GetRuntime();
-		if (Settings::GetSingleton()->armorScalingEnabled) {
-			if (runtime == REL::Module::Runtime::AE) {
+		if (runtime == REL::Module::Runtime::AE) {
+		    if (Settings::GetSingleton()->armorScalingEnabled) {
 				logger::info("Installing ar hook AE");
 				ArmorRatingScaling::InstallArmorRatingHookAE();
-			} else {
-				logger::info("Installing ar hook SE");
-				ArmorRatingScaling::InstallArmorRatingHookSE();	
-			}
-			logger::info("Installed ar hook");
+                logger::info("Installed ar hook AE");
+		    }
+
+            BlockPowerAttackScalingPatch::InstallBlockPowerAttackPatch();
+
+		} else {
+            if (Settings::GetSingleton()->armorScalingEnabled) {
+                logger::info("Installing ar hook SE");
+                ArmorRatingScaling::InstallArmorRatingHookSE();
+		        logger::info("Installed ar hook SE");
+            }
 		}
 
 		if (!BashBlockStaminaPatch::InstallBlockMultHook()) {
 			return false;
 		}
-
-        BlockPowerAttackScalingPatch::InstallBlockPowerAttackPatch();
 
 		return true;
 	}

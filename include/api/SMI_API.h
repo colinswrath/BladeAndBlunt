@@ -20,7 +20,7 @@ namespace SMI_API
     typedef void* (*_RequestPluginAPI)(const InterfaceVersion interfaceVersion);
 
     /// <summary>
-    /// Request the True HUD API interface.
+    /// Request the SMI API interface.
     /// Recommended: Send your request during or after SKSEMessagingInterface::kMessage_PostLoad to make sure the dll has already been loaded
     /// </summary>
     /// <param name="a_interfaceVersion">The interface version to request</param>
