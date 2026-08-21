@@ -1,13 +1,19 @@
 #pragma once
 
-class MiscPatches
+namespace MiscPatches
 {
-public:
+    class MiscPatches
+    {
 
-	static bool InstallScalePatch();
-	static float GetScale(RE::TESObjectREFR* a1);
-	inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
-	static bool InstallFBlockPatch();
-	static bool InstallSpellCapPatch();
-	static std::int32_t AbsorbCapPatch(RE::ActorValueOwner* akAvOwner, RE::ActorValue akValue);
-};
+    public:
+
+	    static bool InstallScalePatch();
+	    static float GetScale(RE::TESObjectREFR* a1);
+	    inline static REL::Relocation<decltype(GetScale)> _GetScaleFunction;
+	    static bool InstallFBlockPatch();
+	    static bool InstallSpellCapPatch();
+        static bool InstallStaggerFormulaPatch();
+
+	    static std::int32_t AbsorbCapPatch(RE::ActorValueOwner* akAvOwner, RE::ActorValue akValue);
+    };
+}

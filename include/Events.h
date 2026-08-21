@@ -1,7 +1,10 @@
 #pragma once
-#include <Conditions.h>
-#include <InjuryApplicationManager.h>
+#include <Utility/Utility.h>
+#include <injury/InjuryApplicationManager.h>
 #include <RecentHitEventData.h>
+#include "Managers/TaskManager.h"
+
+using namespace Utility;
 
 class OnHitEventHandler : public RE::BSTEventSink<RE::TESHitEvent>
 {
@@ -32,67 +35,66 @@ public:
 	
 		if (causeActor && targetActor && targetActor->IsPlayerRef() && !causeActor->IsPlayerRef()) {
 			auto applicationRuntime = GetDurationOfApplicationRunTime();
+            auto settings           = Settings::GetSingleton();
 
-			bool skipEvent = ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime);	//Filters out dupe events
+			if (ShouldSkipHitEvent(causeActor, targetActor, applicationRuntime)) {
+                return RE::BSEventNotifyControl::kContinue;
+            } // Filters out dupe events
+			
+			auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
+			auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
 
-			if (!skipEvent) {			
-				auto attackingWeapon = RE::TESForm::LookupByID<RE::TESObjectWEAP>(a_event->source);
-				auto spellItem = RE::TESForm::LookupByID<RE::SpellItem>(a_event->source);
-
-				//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
-				//We can work around it like this
-				bool powerAttackMelee = false;
-				if (a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) || Conditions::IsPowerAttacking(causeActor)) {
-					bool rightIsMeleeWeapon = false;
-					if (auto rightHandForm = causeActor->GetEquippedObject(false)) {
-						if (rightHandForm->IsWeapon() && rightHandForm->As<RE::TESObjectWEAP>()->IsMelee()) {
-							rightIsMeleeWeapon = true;
-						}
-					}
-
-					bool LeftIsMeleeWeaponOrNone = false;
-					auto leftHandForm = causeActor->GetEquippedObject(true);
-					if (!leftHandForm || (leftHandForm->IsWeapon() && leftHandForm->As<RE::TESObjectWEAP>()->IsMelee()) || leftHandForm->IsArmor()) {
-						LeftIsMeleeWeaponOrNone = true;
-					}
-
-					if (rightIsMeleeWeapon && LeftIsMeleeWeaponOrNone) {
-						powerAttackMelee = true;
+			//Something is effed with power attacks. The source isnt coming through and casting as a weapon and the hit flags are empty
+			//We can work around it like this
+			bool powerAttackMelee = false;
+            if (a_event->flags.any(RE::TESHitEvent::Flag::kPowerAttack) || Utility::IsPowerAttacking(causeActor)) {
+				bool rightIsMeleeWeapon = false;
+				if (auto rightHandForm = causeActor->GetEquippedObject(false)) {
+					if (rightHandForm->IsWeapon() && rightHandForm->As<RE::TESObjectWEAP>()->IsMelee()) {
+						rightIsMeleeWeapon = true;
 					}
 				}
 
-				bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
-                bool isWarding  = targetActor->HasKeywordString("MagicWard"sv);
-
-				if ((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) {
-
-                    float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
-
-                    //Incoming spells while warding do not injure
-                    if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
-					    auto injuryManager = InjuryApplicationManager::GetSingleton();
-                        injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);
-                    }
+				bool LeftIsMeleeWeaponOrNone = false;
+				auto leftHandForm = causeActor->GetEquippedObject(true);
+				if (!leftHandForm || (leftHandForm->IsWeapon() && leftHandForm->As<RE::TESObjectWEAP>()->IsMelee()) || leftHandForm->IsArmor()) {
+					LeftIsMeleeWeaponOrNone = true;
 				}
 
-				auto leftHand = targetActor->GetEquippedObject(true);
-
-				bool blockedMeleeHit = false;
-				if (!a_event->projectile && 
-					((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
-					isBlocking) {
-					blockedMeleeHit = true;
+				if (rightIsMeleeWeapon && LeftIsMeleeWeaponOrNone) {
+					powerAttackMelee = true;
 				}
-				
-				//Shield Stagger
-				if (leftHand && leftHand->IsArmor() && blockedMeleeHit){
-					ProcessHitEventForBlockStagger(targetActor, causeActor);
-				} else if (blockedMeleeHit) {
-					//Parry
-					ProcessHitEventForParry(targetActor,causeActor);
-				}
-				recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 			}
+
+			bool isBlocking = a_event->flags.any(RE::TESHitEvent::Flag::kHitBlocked) || targetActor->IsBlocking();
+            bool isWarding  = PlayerHasActiveMagicEffectWithKeyword(settings->MagicWard);
+            bool isEthereal = targetActor->AsMagicTarget()->HasEffectWithArchetype(RE::EffectSetting::Archetype::kEtherealize);
+
+            if (((attackingWeapon || powerAttackMelee) || (spellItem && spellItem->hostileCount > 0)) && !isEthereal) {
+
+                float chanceMult = isBlocking || isWarding ? 0.50f : 1.0f;
+
+                //Incoming spells while warding do not injure
+                if (!isWarding || !(spellItem && spellItem->hostileCount > 0)) {
+					auto injuryManager = InjuryApplicationManager::GetSingleton();
+                    injuryManager->ProcessHitInjuryApplication(causeActor, targetActor, applicationRuntime, chanceMult);                   
+                }
+			}
+
+			bool blockedMeleeHit = false;
+			if (!a_event->projectile && 
+				((attackingWeapon && attackingWeapon->IsMelee()) || powerAttackMelee) &&
+				isBlocking) {
+				blockedMeleeHit = true;
+			}
+
+            if (blockedMeleeHit) {
+				//Stagger
+				ProcessHitEventForBlockStagger(targetActor, causeActor);
+				//Parry
+				ProcessHitEventForParry(targetActor,causeActor);
+			}
+			recentGeneralHits.insert(std::make_pair(applicationRuntime, RecentHitEventData(targetActor, causeActor, applicationRuntime)));
 		}
 		return RE::BSEventNotifyControl::kContinue;
 	}
@@ -100,8 +102,8 @@ public:
 	static void ProcessHitEventForParry(RE::Actor* target, RE::Actor* aggressor)
 	{
 		auto settings = Settings::GetSingleton();
-		if (Conditions::PlayerHasActiveMagicEffect(settings->MAG_ParryWindowEffect)) {
-			Conditions::ApplySpell(target, aggressor, settings->MAGParryStaggerSpell);
+        if (Utility::PlayerHasActiveMagicEffect(settings->MAG_ParryWindowEffect)) {
+            Utility::ApplySpell(target, aggressor, settings->MAGParryStaggerSpell);
 		}
 	}
 
@@ -109,10 +111,10 @@ public:
 	{
 		auto settings = Settings::GetSingleton();
 		if (target->HasPerk(settings->BlockStaggerPerk)) {
-			Conditions::ApplySpell(target, aggressor, settings->MAGBlockStaggerSpell2);
+            Utility::ApplySpell(target, aggressor, settings->MAGBlockStaggerSpell2);
 		}
 		else {
-			Conditions::ApplySpell(target, aggressor, settings->MAGBlockStaggerSpell);
+			Utility::ApplySpell(target, aggressor, settings->MAGBlockStaggerSpell);
 		}
 	}
 
@@ -144,94 +146,6 @@ public:
 	}
 };
 
-class AnimationGraphEventHandler :
-    public RE::BSTEventSink<RE::BSAnimationGraphEvent>,
-    public RE::BSTEventSink<RE::TESObjectLoadedEvent>,
-    public RE::BSTEventSink<RE::TESSwitchRaceCompleteEvent>
-
-{
-public:
-
-    static AnimationGraphEventHandler* GetSingleton()
-    {
-        static AnimationGraphEventHandler singleton;
-        return &singleton;
-    }
-
-    const char* jumpAnimEventString = "JumpUp";
-
-    //Anims
-    RE::BSEventNotifyControl ProcessEvent(const RE::BSAnimationGraphEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource) override
-    {
-        if (!a_event) {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-
-        if (!a_event->tag.empty() && a_event->holder && a_event->holder->As<RE::Actor>()) {
-            if (std::strcmp(a_event->tag.c_str(), jumpAnimEventString) == 0) {
-
-                HandleJumpAnim();
-            }
-        }
-        
-        return RE::BSEventNotifyControl::kContinue;
-    }
-
-    void HandleJumpAnim()
-    {
-        auto settings = Settings::GetSingleton();
-        auto player   = RE::PlayerCharacter::GetSingleton();
-        if (!player->IsGodMode()) {
-            Conditions::ApplySpell(player, player, settings->jumpSpell);
-        }
-    }
-
-    //Object load
-    RE::BSEventNotifyControl ProcessEvent(const RE::TESObjectLoadedEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESObjectLoadedEvent>* a_eventSource) override
-    {
-        if (!a_event) {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-        
-        const auto actor = RE::TESForm::LookupByID<RE::Actor>(a_event->formID);
-        if (!actor || !actor->IsPlayerRef()) {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-
-        //Register for anim event
-        actor->AddAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
-
-        return RE::BSEventNotifyControl::kContinue;
-    }
-
-    // Race Switch
-    RE::BSEventNotifyControl ProcessEvent(const RE::TESSwitchRaceCompleteEvent* a_event, [[maybe_unused]] RE::BSTEventSource<RE::TESSwitchRaceCompleteEvent>* a_eventSource) override
-    {
-        if (!a_event) {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-
-        const auto actor = a_event->subject->As<RE::Actor>();
-        if (!actor || !actor->IsPlayerRef()) {
-            return RE::BSEventNotifyControl::kContinue;
-        }
-
-        // Register for anim event
-        actor->AddAnimationGraphEventSink(AnimationGraphEventHandler::GetSingleton());
-
-        return RE::BSEventNotifyControl::kContinue;
-    }
-
-    static void Register()
-    {
-
-        //Register for load event, then in the load event register for anims
-        RE::ScriptEventSourceHolder* eventHolder = RE::ScriptEventSourceHolder::GetSingleton();
-        eventHolder->AddEventSink<RE::TESObjectLoadedEvent>(GetSingleton());
-        eventHolder->AddEventSink<RE::TESSwitchRaceCompleteEvent>(GetSingleton());
-    }
-};
-
 class WeaponFireHandler
 {
 public:
@@ -254,10 +168,69 @@ public:
 
 		auto source = a_source->As<RE::Actor>();
 
+        //Player fire
 		if (source->IsPlayerRef() && a_weapon->IsCrossbow()) {
-			Conditions::ApplySpell(source, source,Settings::GetSingleton()->MAGCrossbowStaminaDrainSpell);
-		}
+			Utility::ApplySpell(source, source,Settings::GetSingleton()->MAGCrossbowStaminaDrainSpell);
+        }
+        //NPC fire
+        else if (a_weapon->IsCrossbow())
+        {
+            Utility::ApplySpell(source, source, Settings::GetSingleton()->MAG_CrossbowFiredStaminaSpellNPC);
+        }
+
 	}
 	inline static REL::Relocation<decltype(WeaponFire)> _Weapon_Fire;
+};
+
+class AnimEventHandler
+{
+public:
+    static void Install()
+    {
+        logger::info("Installing AnimEventHook hook");
+
+        REL::Relocation<uintptr_t> AnimEventVtbl_PC{ RE::VTABLE_PlayerCharacter[2] };
+        _ProcessEvent_PC = AnimEventVtbl_PC.write_vfunc(0x1, ProcessEvent_PC);
+    }
+
+private:
+
+
+    inline static RE::BSEventNotifyControl ProcessEvent_PC([[maybe_unused]] RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
+                                                            RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource)
+    {
+        ProcessCharacterEvent(a_sink, a_event, a_eventSource);
+        return _ProcessEvent_PC(a_sink, a_event, a_eventSource);
+    }
+
+    static void HandleJumpAnim()
+    {
+        auto settings = Settings::GetSingleton();
+        auto player   = RE::PlayerCharacter::GetSingleton();
+        if (!player->IsGodMode()) {
+            Utility::ApplySpell(player, player, settings->jumpSpell);
+        }
+    }
+
+    static void ProcessCharacterEvent([[maybe_unused]] RE::BSTEventSink<RE::BSAnimationGraphEvent>* a_sink, RE::BSAnimationGraphEvent* a_event,
+                                              [[maybe_unused]] RE::BSTEventSource<RE::BSAnimationGraphEvent>* a_eventSource)
+    {
+        if (!a_event->holder) {
+            return;
+        }
+
+        std::string_view eventTag = a_event->tag.data();
+        uint32_t         str      = hash(eventTag.data(), eventTag.size());
+
+        RE::Actor* actor = const_cast<RE::Actor*>(a_event->holder->As<RE::Actor>());
+        if (!actor) {
+            return;
+        }
+
+        if (str == "JumpUp"_h) {
+            HandleJumpAnim();
+        }
+    }
+    inline static REL::Relocation<decltype(ProcessEvent_PC)> _ProcessEvent_PC;
 };
 

@@ -1,7 +1,7 @@
 #include "Settings.h"
 #include <SimpleIni.h>
 #include <sstream>
-#include "Cache.h"
+#include "Utility/Cache.h"
 
 Settings* Settings::GetSingleton()
 {
@@ -23,10 +23,6 @@ void Settings::LoadSettings()
 	armorScalingEnabled = ini.GetBoolValue("", "bArmorRatingScalingEnabled", true);
 	replaceAttackTypeKeywords = ini.GetBoolValue("", "bReplaceNewAttackTypeKeywords", true);
 
-	injury1AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury1AVPercent", 0.10));
-	injury2AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury2AVPercent", 0.25));
-	injury3AVPercent = static_cast<float>(ini.GetDoubleValue("", "fInjury3AVPercent", 0.50));
-
 	std::string fileName(ini.GetValue("", "sModFileName", ""));
 	FileName = fileName;
 }
@@ -44,7 +40,7 @@ void Settings::AdjustWeaponStaggerVals()
 {
 	if (zeroAllWeapStagger) {
 		logger::info("Adjusting weapon stagger values");
-		int16_t totalWeaps = 0;
+		int totalWeaps = 0;
 
 		auto dataHandler = RE::TESDataHandler::GetSingleton();
 		if (dataHandler) {
@@ -73,9 +69,9 @@ void Settings::ReplacePowerAttackKeywords()
 		auto targetEvent = std::string("PowerAttackTypeStanding");
 
 		auto dataHandler = RE::TESDataHandler::GetSingleton();
-		auto races = dataHandler->GetFormArray<RE::TESRace>();
+		auto& races = dataHandler->GetFormArray<RE::TESRace>();
 
-		for (auto raceCandidate : races) {
+		for (auto* raceCandidate : races) {
             if (raceCandidate->IsDeleted()) {
                 continue;
             }
@@ -172,6 +168,12 @@ void Settings::LoadForms()
     std::string bashPerkFormId((ini.GetValue("", "BashStaminaPerkFormId", "")));
     BashStaminaPerk = LoadFormPointerFromIni<RE::BGSPerk>(bashPerkFormId, "Update.esm");
 
+    std::string bashPerk25FormId((ini.GetValue("", "BashStaminaPerk25FormId", "")));
+    BashStaminaPerk25 = LoadFormPointerFromIni<RE::BGSPerk>(bashPerk25FormId, "Update.esm");
+
+    std::string blockPerk25FormId((ini.GetValue("", "BlockStaminaPerk25FormId", "")));
+    BlockStaminaPerk25 = LoadFormPointerFromIni<RE::BGSPerk>(blockPerk25FormId, "Update.esm");
+
     std::string blockPerkFormId((ini.GetValue("", "BlockStaminaPerkFormId", "")));
     BlockStaminaPerk = LoadFormPointerFromIni<RE::BGSPerk>(blockPerkFormId, "Update.esm");
 
@@ -181,21 +183,39 @@ void Settings::LoadForms()
     std::string dualWieldKeywordFormId((ini.GetValue("", "DualWieldReplacementKeyword", "")));
     DualWieldReplaceKeyword = LoadFormPointerFromIni<RE::BGSKeyword>(dualWieldKeywordFormId, "Update.esm");
 
-	//Hardcoded loads
-	MAGParryControllerSpell = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
-	MAGParryStaggerSpell = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
-	MAGBlockStaggerSpell = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
-	MAGBlockStaggerSpell2 = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
-	MAGCrossbowStaminaDrainSpell = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
-	MAG_InjuryCooldown1 = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
-	MAG_InjuryCooldown2 = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
-	MAG_ParryWindowEffect = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
-	MAG_InjuriesSMOnly = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
+    //StaggerHUD
+    CSimpleIniA trueHUDini;
+    trueHUDini.SetUnicode();
+    trueHUDini.LoadFile(R"(.\Data\MCM\Settings\TrueHUD.ini)");
 
-	MAG_levelBasedDifficulty = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
-	MAG_PowerAttackReplacement = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
-	MAG_InjuryAndRest = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
-	HealthPenaltyUIGlobal = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    staggerAV_str = ini.GetValue("", "StaggerBarAV", "");
+    staggerBarColor = trueHUDini.GetValue("Colors", "sSpecialColor", "");
+    if (staggerBarColor == "") {
+        staggerBarColor = ini.GetValue("", "StaggerBarColor", "");
+    }
+    staggerFlashColor = trueHUDini.GetValue("Colors", "sSpecialFlashColor", "");
+    if (staggerFlashColor == "") {
+        staggerFlashColor = ini.GetValue("", "StaggerFlashColor", "");
+    } 
+
+    //Hardcoded loads
+	MAGParryControllerSpell         = dataHandler->LookupForm(ParseFormID("0x817"), FileName)->As<RE::SpellItem>();
+	MAGParryStaggerSpell            = dataHandler->LookupForm(ParseFormID("0x816"), FileName)->As<RE::SpellItem>();
+	MAGBlockStaggerSpell            = dataHandler->LookupForm(ParseFormID("0x855"), FileName)->As<RE::SpellItem>();
+	MAGBlockStaggerSpell2           = dataHandler->LookupForm(ParseFormID("0x858"), FileName)->As<RE::SpellItem>();
+	MAGCrossbowStaminaDrainSpell    = dataHandler->LookupForm(ParseFormID("0x873"), FileName)->As<RE::SpellItem>();
+	MAG_InjuryCooldown1             = dataHandler->LookupForm(ParseFormID("0x84F"), FileName)->As<RE::EffectSetting>();
+	MAG_InjuryCooldown2             = dataHandler->LookupForm(ParseFormID("0x850"), FileName)->As<RE::EffectSetting>();
+	MAG_ParryWindowEffect           = dataHandler->LookupForm(ParseFormID("0x815"), FileName)->As<RE::EffectSetting>();
+	MAG_InjuriesSMOnly              = dataHandler->LookupForm(ParseFormID("0x88E"), FileName)->As<RE::TESGlobal>();
+    MAG_BlockCostGlobal             = dataHandler->LookupForm(RE::FormID(0xADA618), "Update.esm")->As<RE::TESGlobal>();
+    MAG_BashCostGlobal              = dataHandler->LookupForm(RE::FormID(0xADA619), "Update.esm")->As<RE::TESGlobal>();
+	MAG_levelBasedDifficulty        = dataHandler->LookupForm(ParseFormID("0x854"), FileName)->As<RE::TESGlobal>();
+	MAG_PowerAttackReplacement      = dataHandler->LookupForm(ParseFormID("0xA9B"), FileName)->As<RE::TESGlobal>();
+	MAG_InjuryAndRest               = dataHandler->LookupForm(ParseFormID("0x83F"), FileName)->As<RE::TESGlobal>();
+	HealthPenaltyUIGlobal           = dataHandler->LookupForm(RE::FormID(0x2EDE), "Update.esm")->As<RE::TESGlobal>();
+    MagicWard                       = dataHandler->LookupForm(RE::FormID(0x1EA69), "Skyrim.esm")->As<RE::BGSKeyword>();
+    MAG_DifficultyGlobal            = dataHandler->LookupForm(RE::FormID(0xADA617), "Update.esm")->As<RE::TESGlobal>();
 
 	auto smGlobal = dataHandler->LookupForm(RE::FormID(0x826), "ccqdrsse001-survivalmode.esl");
 
@@ -203,10 +223,13 @@ void Settings::LoadForms()
 		Survival_ModeEnabled = smGlobal->As<RE::TESGlobal>();
 	}
 
-	if (dataHandler->LookupModByName("Starfrost.esp"))
-	{
-		starfrostInstalled = true;
-	}	
+    //NPC state spells
+    MAG_AttackStaminaStuntSpellNPC      = dataHandler->LookupForm(ParseFormID("0x45"), FileName)->As<RE::SpellItem>();
+    MAG_BlockStaminaStuntSpellNPC       = dataHandler->LookupForm(ParseFormID("0x4B"), FileName)->As<RE::SpellItem>();
+    MAG_BowStaminaStuntSpellNPC         = dataHandler->LookupForm(ParseFormID("0x53"), FileName)->As<RE::SpellItem>();
+    MAG_CastStaminaStuntSpellNPC        = dataHandler->LookupForm(ParseFormID("0x47"), FileName)->As<RE::SpellItem>();
+    MAG_CrossbowFiredStaminaSpellNPC    = dataHandler->LookupForm(ParseFormID("0x54"), FileName)->As<RE::SpellItem>();
+    MAG_CrossbowStaminaStuntSpellNPC    = dataHandler->LookupForm(ParseFormID("0x52"), FileName)->As<RE::SpellItem>();
 
 	SetGlobalsAndGameSettings();
 

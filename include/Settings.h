@@ -1,5 +1,7 @@
 #pragma once
 
+#include "api/SMI_API.h"
+
 class Settings
 {
 public:
@@ -23,8 +25,15 @@ public:
 	RE::SpellItem* MAGParryStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell;
 	RE::SpellItem* MAGBlockStaggerSpell2;
-	RE::SpellItem* MAGParryControllerSpell;
+    RE::SpellItem* MAGParryControllerSpell;
 	RE::SpellItem* MAGCrossbowStaminaDrainSpell;
+
+    RE::SpellItem* MAG_AttackStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_BlockStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_BowStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_CastStaminaStuntSpellNPC;
+    RE::SpellItem* MAG_CrossbowFiredStaminaSpellNPC;
+    RE::SpellItem* MAG_CrossbowStaminaStuntSpellNPC;
 
 	RE::SpellItem* InjurySpell1;
 	RE::SpellItem* InjurySpell2;
@@ -33,14 +42,20 @@ public:
     RE::SpellItem* PowerAttackStopSpell;
 	
 	RE::BGSPerk* BashStaminaPerk;
-	RE::BGSPerk* BlockStaminaPerk;
+    RE::BGSPerk* BashStaminaPerk25;
+    RE::BGSPerk* BlockStaminaPerk;
+    RE::BGSPerk* BlockStaminaPerk25;
 	RE::BGSPerk* BlockStaggerPerk;
+
+    RE::TESGlobal* MAG_BlockCostGlobal;
+    RE::TESGlobal* MAG_BashCostGlobal;
 
 	RE::TESGlobal* InjuryChance90Health;
     RE::TESGlobal* InjuryChance50Health;
 	RE::TESGlobal* InjuryChance25Health;
 	RE::TESGlobal* Survival_ModeEnabled;
-	RE::TESGlobal* MAG_InjuriesSMOnly;
+    RE::TESGlobal* MAG_InjuriesSMOnly;
+    RE::TESGlobal* MAG_DifficultyGlobal;
 
 	RE::TESGlobal* MAG_levelBasedDifficulty;
 	RE::TESGlobal* MAG_InjuryAndRest;
@@ -51,7 +66,16 @@ public:
 	RE::EffectSetting* MAG_InjuryCooldown1;
 	RE::EffectSetting* MAG_InjuryCooldown2;
 
+    RE::StaggerEffect* stagger;
+
 	RE::BGSKeyword* DualWieldReplaceKeyword;
+    RE::BGSKeyword* MagicWard;
+
+    std::string staggerAV_str;
+    std::string staggerBarColor;
+    std::string staggerFlashColor;
+
+    bool SMIHandlingInjuries;
 
 	bool enableInjuries;
 	bool SMOnlyEnableInjuries;
@@ -60,18 +84,20 @@ public:
 	bool replaceAttackTypeKeywords;
 	bool zeroAllWeapStagger;
 	bool armorScalingEnabled;
-	bool starfrostInstalled;
 
     bool wasPowerAttacking=false;
 	
-	float injury1AVPercent;
-	float injury2AVPercent;
-	float injury3AVPercent;
-	float injuryUpdateFrequency = 0.5f;
+    const std::string INJURY_RESIST = "InjuryResist";
+	const float injury1AVPercent = 0.1f;
+	const float injury2AVPercent = 0.25f;
+	const float injury3AVPercent = 0.5f;
+	const float injuryUpdateFrequency = 0.5f;
+    const float zoomTimeThreshold2    = 3.0;
+    const float zoomTimeThreshold3    = 10.0; 
 
 	bool IsBlockingWeaponSpellCasted = false;
 
-	int maxFrameCheck = 6;
+	int maxFrameCheck = 7;
 
 	static RE::FormID ParseFormID(const std::string& str);
 
@@ -109,5 +135,19 @@ public:
             return nullptr;
         }
         
+    }
+
+    void ToggleSMIFromBnB()
+    {
+        logger::info("Requesting SMI API");
+        auto* handle = SMI_API::RequestPluginAPI();
+        if (!handle) {
+            logger::info("SMI API not found");
+            return;
+        }
+        logger::info("SMI detected. Relinquishing healthbar control");
+        auto smi = static_cast<SMI_API::IVSmi1*>(handle);
+        smi->SetInjuryHandlingEnabled(true);
+        SMIHandlingInjuries = true;
     }
 };

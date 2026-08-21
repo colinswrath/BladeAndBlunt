@@ -1,5 +1,5 @@
 #include "Hooks.h"
-#include "Cache.h"
+#include "Utility/Cache.h"
 #include "Events.h"
 #include "Serialization.h"
 
@@ -41,15 +41,27 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 			logger::info("Bash hook installed");
 		}
 
+        if (!Hooks::InstallTrueHUDHook()) {
+            logger::warn("Failed to obtain TrueHUD API");
+        } else {
+            logger::info("Obtained TrueHUD API");
+        }
+
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		if (settings) {
 			settings->LoadForms();
 			settings->AdjustWeaponStaggerVals();
 			settings->ReplacePowerAttackKeywords();
-		}
+            settings->ToggleSMIFromBnB();
 
-        AnimationGraphEventHandler::Register();
+            if (!Hooks::InstallStaggerHUDHook()) {
+                logger::warn("Stagger HUD installation failed.");
+            }
+            else {
+                logger::info("Stagger HUD installed");
+            }
+		}
         OnHitEventHandler::Register();
 
 		break;
@@ -58,7 +70,7 @@ void InitListener(SKSE::MessagingInterface::Message* a_msg)
 
 extern "C" DLLEXPORT constexpr auto SKSEPlugin_Version = []() {
     SKSE::PluginVersionData v{};
-    v.PluginVersion(REL::Version{ 3,5,0,0 });
+    v.PluginVersion(REL::Version{ 4,0,0,0 });
     v.PluginName("BladeAndBlunt"sv);
     v.AuthorName("colinswrath and Kernalsegg"sv);
     v.UsesAddressLibrary(true);
@@ -94,9 +106,9 @@ SKSEPluginLoad(const SKSE::LoadInterface* skse)
 
 	if (auto serialization = SKSE::GetSerializationInterface()) {
 		serialization->SetUniqueID(Serialization::ID);
-		serialization->SetSaveCallback(&Serialization::SaveCallback);
 		serialization->SetLoadCallback(&Serialization::LoadCallback);
-		serialization->SetRevertCallback(&Serialization::RevertCallback);
+        serialization->SetSaveCallback(&Serialization::SaveCallback);
+        serialization->SetRevertCallback(&Serialization::RevertCallback);
 	}
 
 	logger::info("Blade and Blunt loaded.");
