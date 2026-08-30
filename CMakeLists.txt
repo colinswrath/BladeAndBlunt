@@ -3,7 +3,7 @@ message("Using toolchain file ${CMAKE_TOOLCHAIN_FILE}.")
 
 project(
   BladeAndBlunt
-  VERSION 3.5.0
+  VERSION 4.0.1
   LANGUAGES CXX
 )
 

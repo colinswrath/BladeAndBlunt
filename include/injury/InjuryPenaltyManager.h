@@ -54,6 +54,7 @@ public:
         return true;
     }
 
+    //This SHOULD be deprecated
 	void ApplyAttributePenalty(float percentPen)
 	{
 		auto player = RE::PlayerCharacter::GetSingleton();
@@ -69,13 +70,13 @@ public:
 		auto magDelta = lastPenaltyMag - newPenaltyMag;
 
 		if (magDelta < 0) {
-			player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, -1*magDelta);  //Damage or restore AV
+            player->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kDamage, RE::ActorValue::kHealth, -1 * magDelta); // Damage or restore AV
 		}
 
 		//Set tracker av not actual damage
 		currentInjuryPenalty = newPenaltyMag;
 		
-		player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta);	//Damage or restore AV
+		player->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, magDelta); // Damage or restore AV
 	}
 
 	void RemoveAttributePenalty()
@@ -87,7 +88,7 @@ public:
 		if (currentPenaltyMag > 0) {
 			currentInjuryPenalty = 0.0f;
 			SetAttributePenaltyUIGlobal(0.0f);
-			player->AsActorValueOwner()->RestoreActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyMag);
+            player->AsActorValueOwner()->ModActorValue(RE::ACTOR_VALUE_MODIFIER::kPermanent, RE::ActorValue::kHealth, currentPenaltyMag);
 		}
 	}
 
