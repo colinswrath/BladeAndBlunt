@@ -13,7 +13,15 @@ bool NPCUpdateManager::Install()
     logger::info("Installing Actor update");
 
     auto& trampoline = SKSE::GetTrampoline();
-    _OnUpdateFunction = trampoline.write_call<5>(Hooks::Actor_Update_Hook.address(), OnUpdate);
+
+    if (REL::Module::IsAtLeast(SKSE::RUNTIME_SSE_1_7_99))
+    {
+        _OnUpdateFunction = trampoline.write_call<5>(Hooks::Actor_Update_Hook.address(), OnUpdate);
+    }
+    else {
+        _OnUpdateFunction = trampoline.write_call<5>(Hooks::Actor_Update_Hook_Pre17.address(), OnUpdate);
+    }
+
     logger::info("Actor Update Hook installed");
     return true;
 }

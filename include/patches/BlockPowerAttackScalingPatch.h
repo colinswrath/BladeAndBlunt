@@ -87,10 +87,10 @@ namespace BlockPowerAttackScalingPatch
             }
         };
 
-        patchOne code1{ Hooks::hitDataPop.address() + 0x428 };
+        patchOne code1{ Hooks::hitDataPop.address() + REL::Relocate(0x442,0x428) };
 
         auto& trampoline = SKSE::GetTrampoline();
-        trampoline.write_branch<6>(Hooks::hitDataPop.address() + 0x41D, trampoline.allocate(code1));
+        trampoline.write_branch<6>(Hooks::hitDataPop.address() + REL::Relocate(0x437,0x41D), trampoline.allocate(code1));
         logger::info("Block power attack hook installed");
         return true;
     }

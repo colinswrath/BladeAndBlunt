@@ -34,7 +34,14 @@ bool StaggerHUDManager::InstallStaggerHUDHook()
 
     if (trueHUD != nullptr) {
         auto& trampoline = SKSE::GetTrampoline();
-        _Update = trampoline.write_call<5>(Hooks::actorUpdate.address(), Update);
+
+        if (REL::Module::IsAtLeast(SKSE::RUNTIME_SSE_1_7_99)) {
+            _Update = trampoline.write_call<5>(Hooks::Actor_Update_Hook.address(), Update);
+        }
+        else {
+            _Update = trampoline.write_call<5>(Hooks::Actor_Update_Hook_Pre17.address(), Update);
+        }
+
 
         RequestStaggerBarControl();
         SetBarStyle();
